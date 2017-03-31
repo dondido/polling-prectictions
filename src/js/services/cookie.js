@@ -1,0 +1,1 @@
+const $cookie = k => decodeURIComponent((document.cookie.match('(^|; )' + k + '=([^;]*)') || 0)[2] || '');

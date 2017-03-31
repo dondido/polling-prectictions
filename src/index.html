@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>SPA</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/css/index.css">
+</head>
+<body itemscope="itemscope" itemtype="http://schema.org/WebPage">
+  <header class="header" role="banner" itemscope="itemscope" itemtype="http://schema.org/Header">
+    <div class="header-content">
+      <h1 class="header-logo" itemprop="headline">
+        <a class="header-logo-link" href="/">SPA ES6</a>
+      </h1>
+      <nav class="navigation" role="navigation" itemscope="itemscope" itemtype="http://schema.org/SiteNavigationElement">
+        <input type="checkbox" id="navigation-checkbox">
+        <label for="navigation-checkbox" class="burger"></label>
+        <ul class="nav-items">
+            <li class="logged-out"><a class="nav-link" href="/">Log in</a>
+            <li class="logged-out"><a class="nav-link" href="registration">Register</a>
+            <li class="logged-in"><a class="nav-link" href="/">Home</a>
+            <li class="logged-in"><a class="nav-link" href="update-password">Account</a>
+            <li class="logged-in">
+              <form action="/logout" method="POST" class="form" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="${token}">
+                <button type="submit">Logout</button>
+              </form>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <setion class="main-content">${main}</setion>
+  </main>
+  <script src="/js/services/http.js"></script>
+  <script src="/js/services/import.js"></script>
+  <script src="/js/services/cookie.js"></script>
+  <script src="/js/controllers/view.js"></script>
+  <script src="/js/views/page.js"></script>
+  <script src="/js/models/user.js"></script>
+  <script src="/js/controllers/router.js"></script>
+  <script src="/index.js"></script>
+</body>
+</html>

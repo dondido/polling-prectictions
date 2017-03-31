@@ -1,0 +1,13 @@
+<h2>Sign up</h2>
+<form method="POST" class="form" enctype="multipart/form-data">
+    <input type="hidden" name="_csrf" value="${token}">
+    <input class="form-field" id="fullname" type="text" name="fullname" placeholder="Full name" required>
+    <label class="input-bar" for="fullname">Full name</label>
+    <input class="form-field" id="email" type="email" name="email" placeholder="Email" required>
+    <label class="input-bar" for="email">Email</label>
+    <input class="form-field" type="password" id="password" name="password" placeholder="Password" required>
+    <label class="input-bar" for="password">Password</label>
+    <button type="submit">Sign me up!</button>
+    <div id="register-error">Error while registering user!</div>
+</form>
+Already a member? <a href="/">Sign In Here</a>

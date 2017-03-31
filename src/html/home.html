@@ -1,0 +1,8 @@
+<p id="home">${docs.map(d => `
+	<article itemscope itemtype="http://schema.org/Question">
+	    <p itemprop="text"><a href="/polls/${d.url}">${d.desc}</a></p>
+	    <div itemprop="upvoteCount">${d.voted}</div>
+	    <ul>${d.tags.map(t => `<li><a>${t}</a></li>`).join('')}</ul>
+	    <div>Posted on <time itemprop="dateCreated" datetime="${d.created.toISOString()}">${d.created.toISOString().substr(0, 10)}</time></div>
+    </article>
+  `).join('')}</p>

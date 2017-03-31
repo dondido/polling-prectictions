@@ -1,0 +1,14 @@
+<p>
+	<article itemscope itemtype="http://schema.org/Question">
+	    <p itemprop="text"><a>${doc.desc}</a></p>
+	    <div itemprop="upvoteCount">${doc.options.reduce(o => o.votes.length)}</div>
+	    <form method="POST" class="form" enctype="multipart/form-data">
+	    	<input type="hidden" name="_csrf" value="${token}">
+	    	<ul>${doc.options.map((o, i) => `<li><input type="radio" name="answer" value="${i}">${o.desc}`).join('')}</ul>
+	    	<button type="submit">Submit</button>
+	    </form>
+	    <ul>${doc.options.map(o => `<li itemscope itemtype="http://schema.org/Answer"><span itemprop="text">${o.desc}</span><span itemprop="upvoteCount">${o.votes.length}</span>`).join('')}</ul>
+	    <ul>${doc.tags.map(t => `<li><a>${t}</a></li>`).join('')}</ul>
+	    <div>Posted on <time itemprop="dateCreated" datetime="${doc.created.toISOString()}">${doc.created.toISOString().substr(0, 10)}</time></div>
+    </article>
+</p>
