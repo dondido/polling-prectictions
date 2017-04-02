@@ -1,6 +1,8 @@
 <h2>Submit</h2>
 <form method="POST" class="form" enctype="multipart/form-data">
     <input type="hidden" name="_csrf" value="${token}">
+    <input class="form-field" id="question" type="text" name="title" placeholder="Title" required>
+    <label class="input-bar" for="question">Title</label>
     <input class="form-field" id="question" type="text" name="desc" placeholder="Question" required>
     <label class="input-bar" for="question">Question</label>
     <input class="form-field" id="option1" type="text" name="options" placeholder="Option 1" required>

@@ -1,0 +1,6 @@
+<div id="tags">
+<ul>${Object.keys(tags).map(tag => `
+	<li><a href="/tags/${tag}">${tag} ${tags[tag]}</a></li>
+  `).join('')}
+</ul>
+</div>

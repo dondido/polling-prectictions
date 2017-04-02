@@ -16,20 +16,13 @@
         <input type="checkbox" id="navigation-checkbox">
         <label for="navigation-checkbox" class="burger"></label>
         <ul class="nav-items">
-            <li class="logged-out"><a class="nav-link" href="/">Log in</a>
-            <li class="logged-out"><a class="nav-link" href="registration">Register</a>
-            <li class="logged-in"><a class="nav-link" href="/">Home</a>
-            <li class="logged-in"><a class="nav-link" href="update-password">Account</a>
-            <li class="logged-in">
-              <form action="/logout" method="POST" class="form" enctype="multipart/form-data">
-                <input type="hidden" name="_csrf" value="${token}">
-                <button type="submit">Logout</button>
-              </form>
+            <li class="logged-out"><a class="nav-link" href="/">About</a>
+            <li class="logged-out"><a class="nav-link" href="submit">Submit</a>
         </ul>
       </nav>
     </div>
   </header>
-  <main id="main">
+  <main id="main" role="main" itemscope itemprop="mainContentOfPage">
     <setion class="main-content">${main}</setion>
   </main>
   <script src="/js/services/http.js"></script>

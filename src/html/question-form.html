@@ -1,0 +1,5 @@
+<form method="POST" class="form" enctype="multipart/form-data">
+	<input type="hidden" name="_csrf" value="${token}">
+	<ul class="question-options">${doc.options.map((o, i) => `<li class="question-answer"><input class="question-input" type="radio" name="answer" value="${i}" id="${'option-'+i}"><label for="${'option-'+i}" class="question-input-label">${o.desc}</label>`).join('')}</ul>
+	<button type="submit">Submit</button>
+</form>

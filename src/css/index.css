@@ -260,3 +260,108 @@ button:focus {
         max-height: 140px;
     }
 }
+
+/* polling-prediction */
+#home {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.question-tile {
+    width: 260px;
+    max-width: 300px;
+    flex-basis: auto; /* default value */
+    flex-grow: 1;
+    border-radius: 2px;
+    margin: 1ex;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
+    background-color: rgb(65, 65, 65);
+}
+.crime-tag {
+    background-color: rgb(0, 136, 122);
+}
+.space-tag {
+    background-color: rgb(229, 57, 53);
+}
+.mood-tag {
+    background-color: rgb(103, 158, 55);
+}
+.dog-tag {
+    background-color: rgb(29, 135, 228);
+}
+.muslim-tag {
+    background-color: rgb(248, 167, 36);
+}
+.question-tile-content {
+    position: relative;
+    color: white;
+    text-decoration: none;
+    display: block;
+    height: 100%;
+}
+.question-tile-image {
+    width: 100%;
+}
+.question-results,
+.question-options {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+.question-input-label {
+    padding: 1em;
+    display: block;
+    cursor: pointer;
+    color: #6F6F6F;
+    background: #F4F4F4;
+    box-shadow: 0 1px 2px rgba(0,0,0,.1);
+}
+.question-input-label:before {
+    content: '';
+    display: inline-block;
+    width: .6em;
+    height: .6em;
+    border: 2px solid #6F6F6F;
+    border-radius: 50%;
+    margin: 0 .4em;
+}
+.question-input-label:hover:before {
+    border-color: white;
+}
+.question-input {
+    display: none;
+}
+.question-input:checked + .question-input-label:before {
+    border-color: white;
+    box-shadow: inset 0 0 0 2px #41B7D8;
+    background: white;
+}
+.question-input:checked + .question-input-label,
+.question-input-label:hover {
+    color: white;
+    background-color: #41B7D8;
+}
+.question-result,
+.question-answer {
+    flex: 1 0 300px;
+    color: #424242;
+    margin: 1ex;
+}
+.question-answer {
+    border: 1px solid #E0E0E0;
+    margin: 1ex;
+}
+.votes-meter {
+    width: 100%
+}
+.question-tile-text {
+    padding: 10px 10px 40px;
+}
+.question-tile-date {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 280px;
+    font-size: 1.6ex;
+}
