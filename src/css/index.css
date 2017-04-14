@@ -180,7 +180,8 @@ button:focus {
     vertical-align: middle;
     text-align: right;
 }
-.nav-items {
+.nav-items,
+.pagination-list {
     margin: 0;
     padding: 0;
 }
@@ -364,4 +365,66 @@ button:focus {
     left: 10px;
     width: 280px;
     font-size: 1.6ex;
+}
+.navigation-pagination {
+    width: 100%;
+    text-align: center;
+}
+.pagination-period,
+.pagination-item,
+.pagination-current,
+.pagination-prev,
+.pagination-next {
+    display: inline-block;
+    margin: 1px;
+}
+.pagination-period {
+    width: 2.3em;
+    line-height: 4ex; 
+}
+.pagination-period:before {
+    content: '...'
+}
+.pagination-current,
+.pagination-item a,
+.pagination-prev a,
+.pagination-next a,
+.pagination-prev:empty,
+.pagination-next:empty {
+    display: inline-block;
+    width: 2.3em;
+    line-height: 4ex;
+    border: 1px solid #4CAF50;
+}
+.pagination-current {
+    border-color: #333;
+}
+.pagination-prev a:before,
+.pagination-next a:before,
+.pagination-prev:empty:before,
+.pagination-next:empty:before {
+    content: '';
+    display: inline-block;
+    width: .6em;
+    height: .6em;
+}
+.pagination-prev a:before,
+.pagination-prev:empty:before {
+    border-right: 1px solid #4CAF50;
+    border-bottom: 1px solid #4CAF50;
+    transform: rotate(135deg);
+    margin-right: -.2em;
+}
+.pagination-next a:before,
+.pagination-next:empty:before {
+    border-right: 1px solid #4CAF50;
+    border-bottom: 1px solid #4CAF50;
+    transform: rotate(-45deg);
+    margin-left: -.2em;
+}
+.pagination-prev:empty,
+.pagination-next:empty,
+.pagination-prev:empty:before,
+.pagination-next:empty:before {
+    border-color: #333
 }

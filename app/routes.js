@@ -2,29 +2,37 @@ const merge = require('merge'),
     fs = require('fs'),
     path1 = require('path'),
     es6Renderer = require('express-es6-template-engine'),
-    perPage = 4,
-    /*routes = require(__dirname + '/../dist/routes.json'),*/
+    perPage = 2,
     exist = require(__dirname + '/../custom_modules/module-exist'),
-    createPaginaton = (total, page = 0) => {
-        const pages = 7;
+    createPaginaton = (total, page = 1, order) => {
+        const pages = 3;
         const last = Math.ceil( total / perPage );
-        const start = page - pages > 0 ? page - pages : 1;
-        const end = page + pages < last  ? page + pages : last;
-        let html = '<li class="pagination-item">' + (page == 1 ?
-          '<a href="?page=' + ( page - 1 ) + '">&laquo;</a>' : '&laquo;') + '</li>';
-        if ( start > 1 ) {
-            html += '<li><a href="?page=1">1</a></li><li class="disabled">...</li>';
+        const prev = page - pages - Math.max(page + pages - last, 0);
+        const start = prev > 1 ? prev : 1;
+        const next = page + pages + Math.max(pages - page + 1, 0);
+        const end = next < last ? next : last;
+        const params = `href=?order=${order}&page=`;
+        let html = `<li class="pagination-prev">${page !== 1 ? `<a rel="prev" ${params + (page - 1)}></a>` : ''}</li>`;
+        if (start > 1) {
+            html += `<li class="pagination-item"><a ${params + 1} rel="prev">1</a>`;
+            if(start !== 2) {
+                html += '<li class="pagination-period">'
+            }
         }
-        for ( let i = start ; i <= end; i++ ) {
-            html += '<li class="pagination-item">' + (page === i ?
-                '<div class="pagination-current">' + page + '</div>' :
-                '<a href="?page=' + i + '">' + i + '</a>') + '</li>';
+        for ( let i = start; i < page; i ++) {
+            html += `<li class="pagination-item"><a rel="prev" ${params + i}>${i}</a>`;
         }
-        if ( end < last ) {
-            html += '<li class="disabled">...</li><li><a href="?page=' + last + '">' + last + '</a></li>';
+        html += `<li class="pagination-current">${page}`;
+        for (let i = page + 1 ; i <= end; i ++) {
+            html += `<li class="pagination-item"><a rel="next" ${params + i}>${i}</a>`;
         }
-        html += '<li class="pagination-item">' + (page == last ?
-          '<a href="?page=' + ( page + 1 ) + '">&raquo;</a>' : '&raquo;') + '</li>';
+        if (end < last) {
+            if(end !== last - 1) {
+                html += '<li class="pagination-period">'
+            }
+            html += `<li class="pagination-item"><a ${params + last} rel="next">${last}</a>`;
+        }
+        html += `<li class="pagination-next">${page !== last ? `<a ${params + (page + 1)} rel="next"></a>` : ''}</li>`;
         return html;
     };
 
@@ -69,7 +77,7 @@ module.exports = function (app, Poll) {
             if (error) {
                 console.error(error);
             }
-            Poll.find().perPage(10).exec(compile);
+            Poll.find().limit(10).exec(compile);
             req.xhr ? res.end() : res.redirect('#password-updated');
         };
         const setDesc = desc => ({desc});
@@ -124,7 +132,7 @@ module.exports = function (app, Poll) {
         /*const query = Poll.find({'options.votes': { "in" : [req.user.email]}});
         return query.exec().then(doc => console.log(123, doc));*/
     };
-    app.get('/', (req, res) => {
+    /*app.get('/', (req, res) => {
         const dict = {
             locals: {
                 token: req.csrfToken()
@@ -132,40 +140,26 @@ module.exports = function (app, Poll) {
             partials: {main: folder + '/html/compiled/home.html'}
         };
         return res.render('index', dict);
-    });
+    });*/
+    const listPolls = (req, res) => {
+        const order = req.query.order || 'most-recent';
+        const page = req.query.page || 1;
+        const tags = req.params.tag;
+        const query = tags ? {tags} : {};
+        console.log(112, req.query,  order)
+        if('most-recent' === order) {
+            const countDocs = n => {
+                const renderPage = docs => 
+                    res.render('index', {locals: {docs, pagination: createPaginaton(n, + page, order)}, partials: {main: folder + '/html/home.html'}});
+                Poll.find(query).skip(perPage * (page - 1)).limit(perPage).exec().then(renderPage);
+            };
+            Poll.count(query).exec().then(countDocs);
+        }
+    };
+
     app.get(baseRoutes, baseRender);
     app.get('/poll/:poll', pollRender);
     app.post('/poll/:poll', vote);
     app.get('/tags', (req, res) => res.render('index', {partials: {main: folder + '/html/compiled/tags.html'}}));
-    app.get('/tags/:tag', (req, res) => {
-        const renderPage = docs => {
-            console.log(222, docs);
-            res.render('index', {locals: {docs}, partials: {main: folder + '/html/home.html'}})};
-        Poll.find({tags: { in : [req.params.tag]}}).exec().then(renderPage);
-    });
-    app.get('/most-recent', (req, res) => {
-        const page = req.query.page || 1;
-        const renderPage = docs => {
-
-            /*const pageCount = Math.ceil(docs.length / 3);
-            let pagination;
-            if(pageCount < 9) {
-                pagination = Array(pageCount).map((link, idx) => `<a rel="${idx > page ? 'next' : 'prev'}">${idx}</a>`);
-                pagination[page] = '<div>${page}</div>';
-            }
-            else {
-                if(page < 4) {
-                    pagination = Array(7).map((link, idx) => `<a rel="${idx > page ? 'next' : 'prev'}">${idx}</a>`);
-                    pagination.push('<span>...</span>', `<a rel="next">${pageCount}</a>`);
-                    pagination[page] = '<div>${page}</div>';
-                }
-                else if(page > pageCount - 4) {
-
-                }
-            }*/
-            
-            res.render('index', {locals: {docs, pagination: createPaginaton(docs.length, page)}, partials: {main: folder + '/html/home.html'}})
-        };
-        Poll.find().skip(perPage * page).limit(perPage).exec().then(renderPage);
-    });
+    app.get(['/', '/tags/:tag'], listPolls);
 };
