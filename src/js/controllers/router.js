@@ -2,33 +2,58 @@
 import {$import} from 'js/services/import.js';
 import Page from 'js/views/page.js';
 import User from 'js/models/user.js';*/
-var prevRoute;
+let prevRoute;
+const classes = {};
+const htmls = {};
 let firstRender = true;
+const getFileName = path => path.split("/").pop().split(".")[0];
 class Router {
   getFile(page) {
-    prevRoute = page.files;
-    if (page && page.files) {
-      /*if(page.file.slice(-4) === 'html') {
-        new Page(page.files);
-      }
-      else {}*/
-        
-        
-        const createView = files => {
-          console.log(111, files)
-        }
-        const files = [].concat(page.files);
-        const imports = [];
-        const requestFiles = firstRender ? url => url.slice(-4) !== 'html' && imports.push($import(url)) :
-          url => imports.push(url.slice(-4) === 'html' ? $http(url) : $import(url));
-        files.forEach(requestFiles);
-        console.log(110, imports)
-        Promise.all(imports).then(createView);
-        firstRender = false;
-        //System.import('js/views/' + page.file).then(C => new C.default());
-      }
     
+    console.log(page.length);
+    const mapComponents = page.map(files => {
+      const names = [];
+      const imports = [];
+      const assignContent = (content, idx) => {
+        const path = names[idx];
+        const filename = getFileName(path)
+        if(path.slice(-4) === 'html'){
+          htmls[filename] = content;
+        }
+        else {
+          new classes[filename]();
+        }
+      };
+      const createView = contents => contents.forEach(assignContent);
+      const requestFiles = url => {
+        const importJs = () => {
+          names.push(url);
+          imports.push(getFileName(url) in classes ? Promise.resolve() : $import(url));
+        };
+        if(prevRoute === undefined) {
+          if(url.slice(-4) !== 'html') {
+            importJs();
+          }
+        }
+        else {
+          if(url.slice(-4) === 'html') {
+            names.push(url)
+            imports.push($http(url + location.search));
+          }
+          else {
+            importJs();
+          }
+        }
+      };
+      files.forEach(requestFiles);
+      return Promise.all(imports).then(createView);
+    });
+    const componentsDidMount = () => prevRoute = page;
+    Promise.all(mapComponents).then(componentsDidMount);
+    
+    //System.import('js/views/' + page.file).then(C => new C.default());
   }
+    
   /* Sometimes we have a hyperlink that needs to be a hyperlink but we don’t want it
   to process and open the link but only call a javascript function. Fortunately here
   comes a little sassy function to stop the hyperlink and trigger a function call.
@@ -46,7 +71,8 @@ class Router {
         let href = el.getAttribute('href');
         let page = this.getPage(href);
         if(page) {
-          history.pushState({account: User.account}, page.files, href);
+          //history.pushState({account: User.account}, page.files, href);
+          history.pushState({}, page, href);
           this.getFile(page);
           e.preventDefault();
           return;
@@ -64,22 +90,14 @@ class Router {
     prevRoute = route;
   }
   getPage(ref) {
-    var route = this.routes[ref];
-    if(!route) {
-      return;
-    }
-    let page = Object.assign({}, route);
-    if(page.account && User.account) {
-      page.files = page.account;
-    }
-    return page;
+    return this.routes[ref];
   }
   /* Determines the current route by mathcing current location pathname to
   routes map, and returning the route entry with all of its properties. */
   handleRouteChange() {
     var page = this.getPage(this.getRoute(location.pathname));
     if(page) {
-      if(history.state && history.state.account !== User.account) {
+      /*if(history.state && history.state.account !== User.account) {
         history.replaceState({account: User.account}, '', '/');
       }
       else if(!prevRoute || !history.state) {
@@ -87,7 +105,7 @@ class Router {
       } 
       if(prevRoute === page.files) {
         return;
-      }
+      }*/
       this.getFile(page);
     }
   }
@@ -98,7 +116,7 @@ class Router {
         /* As we don't want to make an extra Ajax request to check
         whether the user is logged in or not we set this data as
         part of a document body classList. */
-        User.account = document.body.classList.contains('account');
+        // User.account = document.body.classList.contains('account');
         this.handleRouteChange();
       },
       error = res => console.log('error', res);

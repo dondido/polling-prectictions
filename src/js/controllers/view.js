@@ -2,18 +2,11 @@ var rendered,
   $main,
   $forms;
 class View {
-  constructor(path, init) {
-    if(rendered) {
-      $http({method: 'GET', url: path}).then(res => this.ready(res));
+  constructor(selector, file) {
+    if(file) {
+      document.querySelector(selector).innerHTML = htmls[file];
     }
-    else {
-      /* Initialize and start the view. Obviously, since we here query
-      the DOM, it should have been loaded first. */
-      rendered = true;
-      $main = document.querySelector('.main-content');
-      $forms = document.getElementsByClassName('form');
-      this.init();
-    } 
+    this.init(); 
   }
   get $main() {
     return $main;
@@ -56,8 +49,8 @@ class View {
       as a normal html content and will be inserted into the DOM. */
       let data = JSON.parse(res),
         path = location.href.split('/').slice(3).join('/');
-      User.account = data.account;
-      document.body.classList.toggle('account', User.account);
+      //User.account = data.account;
+      //document.body.classList.toggle('account', User.account);
       /* The response returned can ask for the app to redirect the page,
       most likely to another SPA hash path, but also to another url
       via the returned path property. */
@@ -73,7 +66,7 @@ class View {
         let page = Router.getPage(Router.getRoute(data.path));
         if(page) {
           history[data.path === location.pathname ? 'replaceState' : 'pushState'](
-            {account: User.account}, '', data.path
+            {}, '', data.path
           );
           return Router.getFile(page);
         }

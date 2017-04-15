@@ -11,7 +11,7 @@ const merge = require('merge'),
         const start = prev > 1 ? prev : 1;
         const next = page + pages + Math.max(pages - page + 1, 0);
         const end = next < last ? next : last;
-        const params = `href=?order=${order}&page=`;
+        const params = `href=/?order=${order}&page=`;
         let html = `<li class="pagination-prev">${page !== 1 ? `<a rel="prev" ${params + (page - 1)}></a>` : ''}</li>`;
         if (start > 1) {
             html += `<li class="pagination-item"><a ${params + 1} rel="prev">1</a>`;
@@ -93,7 +93,17 @@ module.exports = function (app, Poll) {
         },
         partials: {main: folder + '/html/' + (url || req.url) + '.html'}
     });
-    const baseRender = (req, res) => { console.log(getBaseParams(req), 222); res.render('index', getBaseParams(req)) };
+    const getFileName = path => path.split("/").pop().split(".")[0];
+    const renderSubmitComponent = (req, res) => {
+        const dict = {
+            locals: {
+                token: req.csrfToken()
+            }
+        };
+        const sendContent = (err, content) => res.send(content);
+        return es6Renderer(folder + req.url, dict, sendContent);
+    };
+    const baseRender = (req, res) => res.render('index', getBaseParams(req));
     const pollRender = (req, res) => {
         const sendPage = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
@@ -132,25 +142,20 @@ module.exports = function (app, Poll) {
         /*const query = Poll.find({'options.votes': { "in" : [req.user.email]}});
         return query.exec().then(doc => console.log(123, doc));*/
     };
-    /*app.get('/', (req, res) => {
-        const dict = {
-            locals: {
-                token: req.csrfToken()
-            },
-            partials: {main: folder + '/html/compiled/home.html'}
-        };
-        return res.render('index', dict);
-    });*/
     const listPolls = (req, res) => {
         const order = req.query.order || 'most-recent';
         const page = req.query.page || 1;
         const tags = req.params.tag;
         const query = tags ? {tags} : {};
-        console.log(112, req.query,  order)
         if('most-recent' === order) {
             const countDocs = n => {
-                const renderPage = docs => 
-                    res.render('index', {locals: {docs, pagination: createPaginaton(n, + page, order)}, partials: {main: folder + '/html/home.html'}});
+                const renderPage = docs => {
+                    const locals = {docs, pagination: createPaginaton(n, + page, order)};
+                    const sendContent = (err, content) => res.send(content);
+                    return req.xhr ? 
+                        es6Renderer(folder + '/html/home.html', {locals}, sendContent) :
+                        res.render('index', {locals, partials: {main: folder + '/html/home.html'}});
+                };
                 Poll.find(query).skip(perPage * (page - 1)).limit(perPage).exec().then(renderPage);
             };
             Poll.count(query).exec().then(countDocs);
@@ -162,4 +167,6 @@ module.exports = function (app, Poll) {
     app.post('/poll/:poll', vote);
     app.get('/tags', (req, res) => res.render('index', {partials: {main: folder + '/html/compiled/tags.html'}}));
     app.get(['/', '/tags/:tag'], listPolls);
+    app.get('/html/submit.html', renderSubmitComponent);
+    app.get('/html/home.html', listPolls);
 };

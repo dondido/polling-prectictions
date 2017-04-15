@@ -1,27 +1,8 @@
 {
-    /*"/": {
-        "files": ["html/login.html"],
-        "account": [["account", "html/account.html"]]
-    },*/
-    "/": {
-        "files": [["html/home.html"]],
-        "account": [["account", "html/account.html"]]
-    },
-    "submit": {
-        "files": [["html/submit.html"]],
-        "account": [["account", "html/account.html"]]
-    },
-    "forgot-password": {
-        "files": ["forgot-password"]
-    },
-    "reset-password": {
-        "files": ["reset-password"]
-    },
-    "update-password": {
-        "files": ["html/login.html"],
-        "account": "html/update-password.html" 
-    },
-    "registration": {
-        "file": "html/registration.html"
-    }
+    "/": [
+        ["html/home.html", "js/views/Home.js"]
+    ],
+    "submit": [
+        ["html/submit.html", "js/views/Submit.js"]
+    ]
 }

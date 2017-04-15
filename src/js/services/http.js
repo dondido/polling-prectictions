@@ -1,7 +1,7 @@
 const $http = function(data) {
     return new Promise(function(resolve, reject) {
         var req = new XMLHttpRequest();
-        req.open(data.method, data.url || location.pathname);
+        req.open(data.method || 'GET', data.url || data || location.pathname);
         req.setRequestHeader("X-XSRF-TOKEN", $cookie('XSRF-TOKEN'));
         req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         req.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
