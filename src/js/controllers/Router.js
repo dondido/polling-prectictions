@@ -9,8 +9,6 @@ let firstRender = true;
 const getFileName = path => path.split("/").pop().split(".")[0];
 class Router {
   getFile(page) {
-    
-    console.log(page.length);
     const mapComponents = page.map(files => {
       const names = [];
       const imports = [];
@@ -50,8 +48,6 @@ class Router {
     });
     const componentsDidMount = () => prevRoute = page;
     Promise.all(mapComponents).then(componentsDidMount);
-    
-    //System.import('js/views/' + page.file).then(C => new C.default());
   }
     
   /* Sometimes we have a hyperlink that needs to be a hyperlink but we don’t want it
@@ -62,14 +58,14 @@ class Router {
   the link natural behaviour and redirecting. This architecture help us provide
   graceful degradation functionality and provides key driver of SEO goodnes. */
   handleClick(e) {
-    var el = e.target;
+    const el = e.target;
     /* Event delegation allows us to avoid adding event listeners to specific nodes; 
     instead, the event listener is added to one parent. That event listener analyses
     bubbled events to find a match on child elements. */
     do {
       if(el.nodeName === 'A') {
-        let href = el.getAttribute('href');
-        let page = this.getPage(href);
+        const href = el.getAttribute('href');
+        const page = this.getPage(href.split('?')[0] || '/');
         if(page) {
           //history.pushState({account: User.account}, page.files, href);
           history.pushState({}, page, href);
@@ -128,4 +124,3 @@ class Router {
     }).then(success, error);
   }
 }
-//export default new Router();

@@ -6,7 +6,11 @@ var mongoose = require('mongoose'),
             type: String,
             required: true,
             maxlength: 1024,
-        }
+        },
+        img: {
+            type: String,
+            maxlength: 64,
+        },
     }),
     Comment = new Schema({
         userName:{ 
@@ -26,6 +30,14 @@ var mongoose = require('mongoose'),
             type: String,
             required: true,
             maxlength: 1024,
+        },
+        thumb: {
+            type: String,
+            maxlength: 64,
+        },
+        img: {
+            type: String,
+            maxlength: 64,
         },
         desc: { 
             type: String,

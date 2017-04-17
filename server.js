@@ -18,7 +18,7 @@ var path = require('path'),
     storage = multer.diskStorage({
         destination: './uploads/',
         filename: function (req, file, cb) {
-            cb(null, req.session.passport.user + '.' + file.originalname.split('.').pop());
+            cb(null, file.fieldname + '-' + Date.now() + '.' + file.originalname.split('.').pop());
         }
     }),
     upload = multer({

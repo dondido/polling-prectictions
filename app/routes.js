@@ -49,43 +49,6 @@ module.exports = function (app, Poll) {
     app.set('views', folder);
     app.set('view engine', 'html');
 
-
-    app.post('/submit', function(req, res) {
-        const rb = req.body;
-        
-        const saveCb = error => {
-            console.log("Your poll has been saved!");
-            const compile = (err, docs) => {
-                const savePage = (err, content, page) => {
-                    console.log(123, content)
-                    fs.writeFile(`${folder}/html/compiled/${page}.html`, content, err => {
-                        if(err) {
-                            return console.log(err);
-                        }
-                        console.log("The file was saved!");
-                    });
-                };
-                const saveHome = (err, content) => savePage(err, content, 'home');
-                const saveTags = (err, content) => savePage(err, content, 'tags');
-                const tags = {};
-                const extractTags = (total, doc) => total.concat(doc.tags);
-                const countTags = i => tags[i] = tags[i] + 1 || 1;
-                docs.reduce(extractTags, []).forEach(countTags);
-                es6Renderer(folder + '/html/home.html', {locals: {docs, pagination: createPaginaton(docs.length)}}, saveHome);
-                es6Renderer(folder + '/html/tags.html', {locals: {tags}}, saveTags);
-            }
-            if (error) {
-                console.error(error);
-            }
-            Poll.find().limit(10).exec(compile);
-            req.xhr ? res.end() : res.redirect('#password-updated');
-        };
-        const setDesc = desc => ({desc});
-        rb.options = rb.options.map(setDesc);
-        const poll = new Poll(rb);
-        poll.save(saveCb);
-    });
-
     const baseRoutes = ['/submit'];
     const getBaseParams = (req, url) => ({
         locals: {
@@ -123,11 +86,11 @@ module.exports = function (app, Poll) {
             dict.locals.token = req.csrfToken();
             es6Renderer(folder + '/html/question-form.html', dict, renderPage);
         }
+        console.log('req.params.poll', req.params.poll)
         return Poll.findOne({url: req.params.poll}).exec().then(sendPage);
     };
     const vote = (req, res) => {
         const registerAnswer = doc => {
-            console.log(req.sessionID)
             const checkVotes = option => option.votes.includes(req.sessionID);
             const voted = doc.options.some(checkVotes);
             if (voted) {
@@ -142,6 +105,44 @@ module.exports = function (app, Poll) {
         /*const query = Poll.find({'options.votes': { "in" : [req.user.email]}});
         return query.exec().then(doc => console.log(123, doc));*/
     };
+    const handleSubmit = (req, res) => {
+        const rb = req.body;
+        const saveCb = error => {
+            console.log("Your poll has been saved!");
+            const compile = (err, docs) => {
+                const savePage = (err, content, page) => {
+                    fs.writeFile(`${folder}/html/compiled/${page}.html`, content, err => {
+                        if(err) {
+                            return console.log(err);
+                        }
+                        console.log("The file was saved!");
+                    });
+                };
+                const saveHome = (err, content) => savePage(err, content, 'home');
+                const saveTags = (err, content) => savePage(err, content, 'tags');
+                const tags = {};
+                const extractTags = (total, doc) => total.concat(doc.tags);
+                const countTags = i => tags[i] = tags[i] + 1 || 1;
+                docs.reduce(extractTags, []).forEach(countTags);
+                es6Renderer(folder + '/html/home.html', {locals: {docs, pagination: createPaginaton(docs.length)}}, saveHome);
+                es6Renderer(folder + '/html/tags.html', {locals: {tags}}, saveTags);
+            }
+            if (error) {
+                console.error(error);
+            }
+            Poll.find().limit(10).exec(compile);
+            req.xhr ? res.end() : res.redirect('#submitted');
+        };
+        const setDesc = desc => ({desc});
+        rb.options = rb.options.map(setDesc);
+        console.log('img',req.file,rb.img )
+        if('img' in rb) {
+
+            const img = req.file ? req.file.filename : rb.img;
+            
+        }
+        (new Poll(rb)).save(saveCb);
+    }
     const listPolls = (req, res) => {
         const order = req.query.order || 'most-recent';
         const page = req.query.page || 1;
@@ -165,6 +166,7 @@ module.exports = function (app, Poll) {
     app.get(baseRoutes, baseRender);
     app.get('/poll/:poll', pollRender);
     app.post('/poll/:poll', vote);
+    app.post('/submit', handleSubmit);
     app.get('/tags', (req, res) => res.render('index', {partials: {main: folder + '/html/compiled/tags.html'}}));
     app.get(['/', '/tags/:tag'], listPolls);
     app.get('/html/submit.html', renderSubmitComponent);
