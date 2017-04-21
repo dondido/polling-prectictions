@@ -1,0 +1,92 @@
+.img-icon {
+    position: relative;
+    width: 500px;
+    height: 200px;
+    overflow: hidden;
+    background: #B9EBFF;
+}
+.sun,
+.upload-icon,
+.sun:before,
+.sun:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    border-radius: 50%;
+}
+.sun {
+    height: 75%;
+    width: 30%;
+    background: #D2F5F0;
+    bottom: 20%;
+    left: 0;
+}
+.sun:before {
+    width: 60%;
+    height: 60%;
+    background: #FCFFDC;
+}
+.sun:after {
+    width: 30%;
+    height: 30%;
+    background: #FFDC69;
+}
+.mountain {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.mountain:before,
+.mountain:after {
+    position: absolute;
+    content: '';
+    background: #A0D778;
+    border-radius: 5%;
+    transform: rotate(45deg);
+    height: 90%;
+    width: 36%;
+    top: 60%;
+    left: 10%;
+}
+.mountain:before {
+    background: #B4EBBE;
+    height: 120%;
+    width: 48%;
+    top: 44%;
+    left: 44%;
+}
+.upload-icon {
+    font-size: 1.6em;
+    width: 2em;
+    height: 2em;
+    background: rgba(0, 0, 0, .4)
+}
+.img-icon:hover .upload-icon {
+    background: rgba(0, 0, 0, .8)
+}
+.upload-icon:before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    top: .8ex;
+    left: .5em;
+    border-style: solid;
+    border-width: 0 .5em .5em .5em;
+    border-color: transparent transparent white transparent;
+}
+.upload-icon:after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: .4em;
+    height: .8em;
+    background: white;
+    top: 1.2ex;
+    left: .8em;
+}

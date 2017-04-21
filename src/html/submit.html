@@ -1,29 +1,57 @@
 <div class="submit-page">
     <div id="submitted">Thank you for your submission! It will now undergo review and moderation, and will be published if approved.</div>
-    <div class="submit-form">
+    <div class="submit-content">
         <h2>Submit</h2>
-        <form method="POST" class="form" enctype="multipart/form-data">
+        <input class="text-input" id="text-poll" name="tab-input" type="radio">
+        <input class="image-input" id="image-poll" name="tab-input" type="radio">
+        <input class="video-input" id="video-poll" name="tab-input" type="radio">
+        <label for="text-poll" class="text-poll-tab">Text</label>
+        <label for="image-poll" class="image-poll-tab">Image</label>
+        <label for="video-poll" class="video-poll-tab">Video</label>
+        <form method="POST" class="form submit-form" enctype="multipart/form-data">
+            <figure class="image-placeholder">
+                <img class="media-icon" src="/images/picture.svg" alt="Image example">
+                <figcaption>Click to add image</figcaption>
+            </figure>
             <input type="hidden" name="_csrf" value="${token}">
             <label class="input-label" for="question-title">Title</label>
             <input class="form-field" id="question-title" type="text" name="title" placeholder="Title" required>
             <label class="input-label" for="question-desc">Question</label>
-            <figure class="user-avatar">
-                <img class="user-avatar-img" src="" alt="Avatar">
-            </figure>
-            <label class="input-bar" for="img">Enter URL</label>
-            <input class="form-field" id="img" placeholder="Enter image URL" type="text" name="img" required>
-            <label class="button file-input-button" for="file-input">Choose File</label>
-            <input type="file" accept="image/*" name="avatar" class="file-input" id="file-input">
             <input class="form-field" id="question-desc" type="text" name="desc" placeholder="Question" required>
-            <label class="input-label" for="option1">Option 1</label>
-            <input class="form-field" id="option1" type="text" name="options" placeholder="Option 1" required>
-            <label class="input-label" for="option2">Option 2</label>
-            <input class="form-field" id="option2" type="text" name="options" placeholder="Option 2" required>
+            <div class="option-block">
+                <label class="input-label" for="option1">Option 1</label>
+                <figure class="option-image-placeholder">
+                    <img class="media-icon" src="/images/picture.svg" alt="Image example">
+                    <figcaption>Click to add image</figcaption>
+                </figure>
+                <figure class="option-video-placeholder">
+                    <img class="media-icon" src="/images/picture.svg" alt="Image example">
+                    <figcaption>Click to add image</figcaption>
+                </figure>
+                <input class="form-field" id="option1" type="text" name="options" placeholder="Option 1" required>
+            </div>
+            <div class="option-block">
+                <label class="input-label" for="option1">Option 2</label>
+                <figure class="option-image-placeholder">
+                    <img class="media-icon" src="/images/picture.svg" alt="Image example">
+                    <figcaption>Click to add image</figcaption>
+                </figure>
+                <input class="form-field" id="option1" type="text" name="options" placeholder="Option 2" required>
+            </div>
             <label class="input-label" for="tags">Tags</label>
             <input class="form-field" id="tags" type="text" name="tags" placeholder="Tags" required>
             <label class="input-label" for="url">Url</label>
             <input class="form-field" id="url" type="text" name="url" placeholder="Url" required>
             <button type="submit">Submit</button>
         </form>
-    <div class="submit-form">
+    </div>
+    <div class="img-menu">
+        <figure class="user-avatar">
+            <img class="user-avatar-img" src="" alt="Avatar">
+        </figure>
+        <label class="input-bar" for="img">Enter URL</label>
+        <input class="form-field" id="img" placeholder="Enter image URL" type="text" name="img" required>
+        <label class="button file-input-button" for="file-input">Choose File</label>
+        <input type="file" accept="image/*" name="avatar" class="file-input" id="file-input">
+    </div>
 </div>
