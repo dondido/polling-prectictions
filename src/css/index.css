@@ -72,7 +72,8 @@ button:focus,
     box-sizing: border-box;
 }
 .image-placeholder,
-.option-image-placeholder {
+.option-image-placeholder,
+.option-video-placeholder {
     margin: 0;
     cursor: pointer;
     background: darkgray;
@@ -94,6 +95,7 @@ button:focus,
 .video-input,
 .question-input,
 .option-image-placeholder,
+.option-video-placeholder,
 #navigation-checkbox,
 #submitted,
 #submitted:target + .submit-content {
@@ -371,7 +373,8 @@ button:focus,
     position: relative;
 }
 .image-placeholder:hover,
-.option-image-placeholder:hover {
+.option-image-placeholder:hover,
+.option-video-placeholder:hover {
     background: gray;
 }
 .media-icon {
@@ -407,6 +410,7 @@ button:focus,
 .video-input:checked ~ .video-poll-tab:after {
     border-color: transparent transparent green transparent;
 }
+.video-input:checked ~ .submit-form .option-video-placeholder,
 .image-input:checked ~ .submit-form .option-image-placeholder {
     display: flex;
 }
