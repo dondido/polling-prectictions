@@ -4,6 +4,25 @@ const merge = require('merge'),
     es6Renderer = require('express-es6-template-engine'),
     perPage = 2,
     exist = require(__dirname + '/../custom_modules/module-exist'),
+     multer = require('multer'),
+    storage = multer.diskStorage({
+        destination: './uploads/',
+        filename: function (req, file, cb) {
+            cb(null, file.fieldname + '-' + Date.now() + '.' + file.originalname.split('.').pop());
+        }
+    }),
+    upload = multer({
+        storage: storage,
+        limits: {fileSize: 1024 * 1024 / 10},
+        fileFilter: function (req, file, cb) {
+            if((/\.(gif|jpg|jpeg|svg|png)$/i).test(file.originalname) === true &&
+                ['image/png', 'image/jpeg', 'image/svg+xml', 'image/gif'].indexOf(file.mimetype) !== -1) {
+                return cb(null, true);
+            }
+            console.log('has failed to upload file:' + file.originalname);
+            cb(null, false, new Error());
+        }
+    }),
     createPaginaton = (total, page = 1, order) => {
         const pages = 3;
         const last = Math.ceil( total / perPage );
@@ -107,7 +126,7 @@ module.exports = function (app, Poll) {
     };
     const handleSubmit = (req, res) => {
         const rb = req.body;
-        console.log(222, rb)
+        console.log(222, rb, req.files)
         const saveCb = error => {
             console.log("Your poll has been saved!");
             const compile = (err, docs) => {
@@ -167,7 +186,8 @@ module.exports = function (app, Poll) {
     app.get(baseRoutes, baseRender);
     app.get('/poll/:poll', pollRender);
     app.post('/poll/:poll', vote);
-    app.post('/submit', handleSubmit);
+    //Beware, you need to match .single() with whatever name="" of your file upload field in html
+    app.post('/submit', upload.array('photos'), handleSubmit);
     app.get('/tags', (req, res) => res.render('index', {partials: {main: folder + '/html/compiled/tags.html'}}));
     app.get(['/', '/tags/:tag'], listPolls);
     app.get('/html/submit.html', renderSubmitComponent);

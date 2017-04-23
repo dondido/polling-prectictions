@@ -14,25 +14,6 @@ var path = require('path'),
     /* The csurf middleware provides easy-to-use protection against
     Cross Site Request Forgeries. */
     csrf = require('csurf'),
-    multer = require('multer'),
-    storage = multer.diskStorage({
-        destination: './uploads/',
-        filename: function (req, file, cb) {
-            cb(null, file.fieldname + '-' + Date.now() + '.' + file.originalname.split('.').pop());
-        }
-    }),
-    upload = multer({
-        storage: storage,
-        limits: {fileSize: 1024 * 1024 / 10},
-        fileFilter: function (req, file, cb) {
-            if((/\.(gif|jpg|jpeg|svg|png)$/i).test(file.originalname) === true &&
-                ['image/png', 'image/jpeg', 'image/svg+xml', 'image/gif'].indexOf(file.mimetype) !== -1) {
-                return cb(null, true);
-            }
-            console.log('has failed to upload file:' + file.originalname);
-            cb(null, false, new Error());
-        }
-    }),
     cookieParser = require('cookie-parser'),
     mongoose = require('mongoose'),
     /* Here we find an appropriate database to connect to, defaulting to
@@ -79,7 +60,6 @@ mongoose.connect(uristring, function (err, res) {
                 }
             })
         );
-        app.use(upload.single('avatar')); //Beware, you need to match .single() with whatever name="" of your file upload field in html
         app.use(cookieParser());
         // Important : csrf should be added after cookie and session initialization.
         // Otherwise you will get 'Error: misconfigured csrf'
