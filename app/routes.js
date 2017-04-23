@@ -107,6 +107,7 @@ module.exports = function (app, Poll) {
     };
     const handleSubmit = (req, res) => {
         const rb = req.body;
+        console.log(222, rb)
         const saveCb = error => {
             console.log("Your poll has been saved!");
             const compile = (err, docs) => {
@@ -142,7 +143,7 @@ module.exports = function (app, Poll) {
             
         }
         (new Poll(rb)).save(saveCb);
-    }
+    };
     const listPolls = (req, res) => {
         const order = req.query.order || 'most-recent';
         const page = req.query.page || 1;

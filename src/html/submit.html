@@ -1,49 +1,111 @@
 <div class="submit-page">
     <div id="submitted">Thank you for your submission! It will now undergo review and moderation, and will be published if approved.</div>
     <div class="submit-content">
-        <h2>Submit</h2>
-        <input class="text-input" id="text-poll" name="tab-input" type="radio">
-        <input class="image-input" id="image-poll" name="tab-input" type="radio">
-        <input class="video-input" id="video-poll" name="tab-input" type="radio">
-        <label for="text-poll" class="text-poll-tab">Text</label>
-        <label for="image-poll" class="image-poll-tab">Image</label>
-        <label for="video-poll" class="video-poll-tab">Video</label>
-        <form method="POST" class="form submit-form" enctype="multipart/form-data">
-            <figure class="image-placeholder">
-                <img class="media-icon" src="/images/picture.svg" alt="Image example">
-                <figcaption>Click to add image</figcaption>
-            </figure>
+        <h1>Submit</h2>
+        <form method="POST" class="form submit-form" name="submit" enctype="multipart/form-data">    
             <input type="hidden" name="_csrf" value="${token}">
-            <label class="input-label" for="question-title">Title</label>
-            <input class="form-field" id="question-title" type="text" name="title" placeholder="Title" required>
-            <label class="input-label" for="question-desc">Question</label>
-            <input class="form-field" id="question-desc" type="text" name="desc" placeholder="Question" required>
-            <div class="option-block">
-                <label class="input-label" for="option1">Option 1</label>
-                <figure class="option-image-placeholder">
-                    <img class="media-icon" src="/images/picture.svg" alt="Image example">
-                    <figcaption>Click to add image</figcaption>
-                </figure>
-                <figure class="option-video-placeholder">
-                    <img class="media-icon" src="/images/youtube.svg" alt="Video example">
-                    <figcaption>Click to add video</figcaption>
-                </figure>
-                <input class="form-field" id="option1" type="text" name="options" placeholder="Option 1" required>
+            <div class="field-block">
+                <h2 class="field-title">Thumbnail *</h2>
+                <menu class="submit-menu">
+                    <label class="button file-input-button">
+                        <input type="file" accept="image/*" name="thumbnail" class="file-input">
+                    </label>
+                </menu>
+                <div class="field-text">2:1 ratio</div>
+                <h3 class="uploaded-title">Uploaded media</h3>
+                <menu class="submit-menu">
+                    <div class="media-delete-button">&#10005;</div>
+                </menu>
+                <div class="uploaded-content">
+                    <img class="uploaded-image" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>" alt="Uploaded image">
+                </div>
             </div>
-            <label class="input-label" for="tags">Tags</label>
-            <input class="form-field" id="tags" type="text" name="tags" placeholder="Tags" required>
-            <label class="input-label" for="url">Url</label>
-            <input class="form-field" id="url" type="text" name="url" placeholder="Url" required>
-            <button type="submit">Submit</button>
+            <div class="field-block">
+                <h2 class="field-title">Content *</h2>
+                <menu class="submit-menu">
+                    <label class="button file-input-button">
+                        <input type="file" accept="image/*" name="description-image" class="file-input">
+                    </label>
+                    <div class="video-input-button"></div>
+                </menu>
+                <label class="field-text" for="submission-description">Description</label>
+                <input class="form-field" id="submission-description" type="text" name="title" placeholder="Description" required>
+                <label class="field-appendix" for="submission-appendix">Appendix</label>
+                <input class="form-field" type="text" name="desc" placeholder="Appendix" id="submission-appendix" required>
+                <h3 class="uploaded-title">Uploaded media</h3>
+                <menu class="submit-menu">
+                    <div class="media-delete-button">&#10005;</div>
+                </menu>
+                <div class="uploaded-content">
+                    <img class="uploaded-image" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>" alt="Uploaded image">
+                    <iframe class="uploaded-video"></iframe>
+                </div>
+            </div>
+            <div class="option-block">
+                <h2 class="option-title"></h2>
+                <menu class="submit-menu">
+                    <label class="button file-input-button">
+                        <input type="file" accept="image/*" name="thumbnail" class="file-input">
+                    </label>
+                    <div class="video-input-button"></div>
+                    <div class="answer-delete-button">&#10005;</div>
+                </menu>
+                <label class="field-text">
+                    Description
+                    <input class="form-field" type="text" name="options" placeholder="Your answer here" required>
+                </label>
+                <h3 class="uploaded-title">Uploaded media</h3>
+                <menu class="submit-menu">
+                    <div class="media-delete-button">&#10005;</div>
+                </menu>
+                <div class="uploaded-content">
+                    <img class="uploaded-image" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>" alt="Uploaded image">
+                    <iframe class="uploaded-video"></iframe>
+                </div>
+            </div>
+            <div class="option-block">
+                <h2 class="option-title"></h2>
+                <menu class="submit-menu">
+                    <label class="button file-input-button">
+                        <input type="file" accept="image/*" name="thumbnail" class="file-input">
+                    </label>
+                    <div class="video-input-button"></div>
+                </menu>
+                <label class="field-text">
+                    Description
+                    <input class="form-field" type="text" name="options" placeholder="Your answer here" required>
+                </label>
+                <h3 class="uploaded-title">Uploaded media</h3>
+                <menu class="submit-menu">
+                    <div class="media-delete-button">&#10005;</div>
+                </menu>
+                <div class="uploaded-content">
+                    <img class="uploaded-image" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>" alt="Uploaded image">
+                    <iframe class="uploaded-video"></iframe>
+                </div>
+            </div>
+            <div class="add-option-button" role="button">Add answer</div>
+            <div class="field-block">
+                <h2 class="field-title"><label for="tags">Tags</label></h2>
+                <div class="field-text">Up to 5 comma separated list of tags</div>
+                <input class="form-field" id="tags" type="text" name="tags" placeholder="Tags" required>
+            </div>
+            <div class="field-block">
+                <h2 class="field-title"><label for="url">Url</label></h2>
+                <input class="form-field" id="url" type="text" name="url" placeholder="Url" required>
+            </div>
+            <button>Submit</button>
         </form>
-    </div>
-    <div class="img-menu">
-        <figure class="user-avatar">
-            <img class="user-avatar-img" src="" alt="Avatar">
-        </figure>
-        <label class="input-bar" for="img">Enter URL</label>
-        <input class="form-field" id="img" placeholder="Enter image URL" type="text" name="img" required>
-        <label class="button file-input-button" for="file-input">Choose File</label>
-        <input type="file" accept="image/*" name="avatar" class="file-input" id="file-input">
+        <div class="media-modal">
+            <div class="media-block">
+                <h2 class="field-title"><label for="video-input">Upload video</label></h2>
+                <menu class="submit-menu">
+                    <div class="media-modal-x">&#10005;</div>
+                </menu>
+                <div class="field-text">To embed a YouTube video, simply copy the video's URL from your web browser's address bar and paste it in the input field below.</div>
+                <input class="form-field video-input" id="video-input" type="text" name="video-input" placeholder="https://www.youtube.com/watch?v=Zv80ibV-0FM">
+                <button type="button" class="set-video-button">OK</button>
+            </div>
+        </div>
     </div>
 </div>
