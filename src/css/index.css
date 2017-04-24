@@ -85,8 +85,7 @@ button:focus,
 .img-menu,
 .question-input,
 .file-input,
-.option-image-placeholder,
-.option-video-placeholder,
+.media-text,
 .answer-delete-button,
 .uploaded-title + .submit-menu,
 .uploaded-title ~ .uploaded-content,
@@ -431,7 +430,9 @@ button:focus,
 .option-title:before {
     content: 'Answer ' counter(options);
 }
-.field-text {
+.field-text,
+.media-text {
+    width: 100%;
     flex-basis: 100%;
 }
 .field-appendix {
@@ -464,11 +465,12 @@ button:focus,
 }
 .image-file + .submit-menu,
 .image-file ~ .uploaded-content,
+.image-file ~ .media-text,
 .video-link + .submit-menu,
 .video-link ~ .uploaded-content,
+.video-link ~ .media-text,
 .media-modal.show {
     display: flex;
-
 }
 .media-modal {
     background: rgba(0, 0, 0, .3);
@@ -505,4 +507,17 @@ button:focus,
     vertical-align: top;
     padding: 0 .5ex;
     transform: rotate(45deg);
+}
+.media-text {
+    color: #373a3c;
+    border: none;
+    background: transparent;
+}
+.image-file ~ .media-text:before {
+    content: 'Image name: ' attr(data-media);
+    word-wrap: break-word;
+}
+.video-link ~ .media-text:before {
+    content: 'Video link: ' attr(data-media);
+    word-wrap: break-word;
 }

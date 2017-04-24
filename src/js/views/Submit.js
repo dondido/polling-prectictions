@@ -35,10 +35,11 @@ class Submit extends FormHandler {
 		this.$mediaModal.classList.remove('show');
 	}
 	setVideo() {
-		const cl = this.$video.parentNode.parentNode.querySelector('.uploaded-title').classList;
+		const $block = this.$video.parentNode.parentNode;
+		const cl = $block.querySelector('.uploaded-title').classList;
 		cl.remove('image-file');
 		cl.add('video-link');
-		this.$video.src ='https://www.youtube.com/embed/' + this.$videoInput.value.split('?v=').pop();
+		$block.querySelector('.media-text').dataset.media = this.$video.src ='https://www.youtube.com/embed/' + this.$videoInput.value.split('?v=').pop();
 		this.hideMediaModal();
 	}
 	removeAnswer(e) {
@@ -56,14 +57,16 @@ class Submit extends FormHandler {
 	changeFile(e) {
 		const reader = new FileReader();
 		const $input = e.target;
+		const file = $input.files && $input.files[0];
 		reader.onload = e => {
 			const $block = $input.parentNode.parentNode.parentNode;
 			const cl = $block.querySelector('.uploaded-title').classList;
 			cl.add('image-file');
 			cl.remove('video-link');
 			$block.querySelector('.uploaded-content .uploaded-image').src = e.target.result;
+			$block.querySelector('.media-text').dataset.media = $block.querySelector('.media-input').value = file.name;
 		};
-		$input.files && $input.files[0] && reader.readAsDataURL($input.files[0]);
+		file && reader.readAsDataURL(file);
 	}
 	submit(e) {
 		super.submit(e);
