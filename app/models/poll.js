@@ -7,9 +7,9 @@ var mongoose = require('mongoose'),
             required: true,
             maxlength: 1024,
         },
-        img: {
+        media: {
             type: String,
-            maxlength: 64,
+            maxlength: 128,
         },
     }),
     Comment = new Schema({
@@ -26,7 +26,7 @@ var mongoose = require('mongoose'),
         created: {type: Date, default: Date.now},
     }),
     Poll = new Schema({
-        title:{ 
+        appendix:{ 
             type: String,
             required: true,
             maxlength: 1024,
@@ -35,9 +35,9 @@ var mongoose = require('mongoose'),
             type: String,
             maxlength: 64,
         },
-        img: {
+        media: {
             type: String,
-            maxlength: 64,
+            maxlength: 128,
         },
         desc: { 
             type: String,
@@ -55,6 +55,7 @@ var mongoose = require('mongoose'),
         tags: [String],
         options: [Option],
         comments: [Comment],
+        expire: Date,
         created: {type: Date, default: Date.now}
     });
 module.exports = mongoose.model('Poll', Poll);

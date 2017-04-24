@@ -126,7 +126,7 @@ module.exports = function (app, Poll) {
     };
     const handleSubmit = (req, res) => {
         const rb = req.body;
-        console.log(222, rb, req.files)
+        const {media, files} = rb;
         const saveCb = error => {
             console.log("Your poll has been saved!");
             const compile = (err, docs) => {
@@ -153,14 +153,17 @@ module.exports = function (app, Poll) {
             Poll.find().limit(10).exec(compile);
             req.xhr ? res.end() : res.redirect('#submitted');
         };
-        const setDesc = desc => ({desc});
-        rb.options = rb.options.map(setDesc);
-        console.log('img',req.file,rb.img )
-        if('img' in rb) {
-
-            const img = req.file ? req.file.filename : rb.img;
-            
+        const setDesc = (desc, idx) => {
+            const originalname = media[idx];
+            const getFile = file => file.originalname === originalname;
+            return {
+                desc,
+                media: files.find(getFile).filename
+            };
         }
+        rb.thumb = media.shift();
+        rb.media = media.shift();
+        rb.options = rb.options.map(setDesc);
         (new Poll(rb)).save(saveCb);
     };
     const listPolls = (req, res) => {
