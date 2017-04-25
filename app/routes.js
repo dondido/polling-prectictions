@@ -159,11 +159,14 @@ module.exports = function (app, Poll) {
             const getFile = file => file.originalname === originalname;
             return {
                 desc,
-                media: files.find(getFile).filename
+                media: originalname === '' ? '' : files.find(getFile).filename
             };
         };
         const setMedia = () => {
             const originalname = media.shift();
+            if(originalname === '') {
+                return '';
+            }
             const getFile = file => file.originalname === originalname;
             return files.find(getFile).filename;
         };

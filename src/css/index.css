@@ -224,21 +224,6 @@ button:focus,
     box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
     background-color: rgb(65, 65, 65);
 }
-.crime-tag {
-    background-color: rgb(0, 136, 122);
-}
-.space-tag {
-    background-color: rgb(229, 57, 53);
-}
-.mood-tag {
-    background-color: rgb(103, 158, 55);
-}
-.dog-tag {
-    background-color: rgb(29, 135, 228);
-}
-.muslim-tag {
-    background-color: rgb(248, 167, 36);
-}
 .question-tile-content {
     position: relative;
     color: white;
