@@ -13,7 +13,7 @@ const merge = require('merge'),
     }),
     upload = multer({
         storage: storage,
-        limits: {fileSize: 1024 * 1024 / 10},
+        limits: {fileSize: 1024 * 1024 / 2},
         fileFilter: function (req, file, cb) {
             if((/\.(gif|jpg|jpeg|svg|png)$/i).test(file.originalname) === true &&
                 ['image/png', 'image/jpeg', 'image/svg+xml', 'image/gif'].indexOf(file.mimetype) !== -1) {
@@ -125,8 +125,9 @@ module.exports = function (app, Poll) {
         return query.exec().then(doc => console.log(123, doc));*/
     };
     const handleSubmit = (req, res) => {
-        const rb = req.body;
-        const {media, files} = rb;
+        console.log(req.files, res.files)
+        const {body, files} = req;
+        const {media} = body;
         const saveCb = error => {
             console.log("Your poll has been saved!");
             const compile = (err, docs) => {
@@ -160,11 +161,16 @@ module.exports = function (app, Poll) {
                 desc,
                 media: files.find(getFile).filename
             };
-        }
-        rb.thumb = media.shift();
-        rb.media = media.shift();
-        rb.options = rb.options.map(setDesc);
-        (new Poll(rb)).save(saveCb);
+        };
+        const setMedia = () => {
+            const originalname = media.shift();
+            const getFile = file => file.originalname === originalname;
+            return files.find(getFile).filename;
+        };
+        body.thumb = setMedia();
+        body.media = setMedia();
+        body.options = body.options.map(setDesc);
+        (new Poll(body)).save(saveCb);
     };
     const listPolls = (req, res) => {
         const order = req.query.order || 'most-recent';
