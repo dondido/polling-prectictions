@@ -35,6 +35,7 @@ var mongoose = require('mongoose'),
             type: String,
             maxlength: 64,
         },
+        folder: Number,
         media: {
             type: String,
             maxlength: 128,

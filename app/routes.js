@@ -4,25 +4,7 @@ const merge = require('merge'),
     es6Renderer = require('express-es6-template-engine'),
     perPage = 2,
     exist = require(__dirname + '/../custom_modules/module-exist'),
-     multer = require('multer'),
-    storage = multer.diskStorage({
-        destination: './uploads/',
-        filename: function (req, file, cb) {
-            cb(null, file.fieldname + '-' + Date.now() + '.' + file.originalname.split('.').pop());
-        }
-    }),
-    upload = multer({
-        storage: storage,
-        limits: {fileSize: 1024 * 1024 / 2},
-        fileFilter: function (req, file, cb) {
-            if((/\.(gif|jpg|jpeg|svg|png)$/i).test(file.originalname) === true &&
-                ['image/png', 'image/jpeg', 'image/svg+xml', 'image/gif'].indexOf(file.mimetype) !== -1) {
-                return cb(null, true);
-            }
-            console.log('has failed to upload file:' + file.originalname);
-            cb(null, false, new Error());
-        }
-    }),
+    multer = require('multer'),
     createPaginaton = (total, page = 1, order) => {
         const pages = 3;
         const last = Math.ceil( total / perPage );
@@ -56,14 +38,37 @@ const merge = require('merge'),
     };
 
 module.exports = function (app, Poll) {
-    var folder = app.get('folder'),
-        redirectHash = function(req, res, path) {
-            return req.xhr ? res.json(
-                {
-                    path: path
-                }
-            ) : res.redirect(path);
-        };
+    const folder = app.get('folder');
+    const redirectHash = function(req, res, path) {
+        return req.xhr ? res.json(
+            {
+                path: path
+            }
+        ) : res.redirect(path);
+    };
+    const storage = multer.diskStorage({
+        destination(req, file, callback) {
+            req.body.folder = req.body.folder || Date.now();
+            const uploadPath = `${folder}/uploads/${req.body.folder}`;
+            const setPath = () => callback(null, uploadPath);
+            fs.mkdir(uploadPath, setPath);
+        },
+        filename(req, file, cb) {
+            cb(null, file.originalname);
+        },
+    });
+    const upload = multer({
+        storage: storage,
+        limits: {fileSize: 1024 * 1024 / 2},
+        fileFilter(req, file, cb) {
+            if((/\.(gif|jpg|jpeg|svg|png)$/i).test(file.originalname) === true &&
+                ['image/png', 'image/jpeg', 'image/svg+xml', 'image/gif'].indexOf(file.mimetype) !== -1) {
+                return cb(null, true);
+            }
+            console.log('has failed to upload file:' + file.originalname);
+            cb(null, false, new Error());
+        }
+    });
     app.engine('html', es6Renderer);
     app.set('views', folder);
     app.set('view engine', 'html');
@@ -128,7 +133,7 @@ module.exports = function (app, Poll) {
         console.log(req.files, res.files)
         const {body, files} = req;
         const {media} = body;
-        const saveCb = error => {
+        /*const saveCb = error => {
             console.log("Your poll has been saved!");
             const compile = (err, docs) => {
                 const savePage = (err, content, page) => {
@@ -153,27 +158,21 @@ module.exports = function (app, Poll) {
             }
             Poll.find().limit(10).exec(compile);
             req.xhr ? res.end() : res.redirect('#submitted');
-        };
-        const setDesc = (desc, idx) => {
-            const originalname = media[idx];
-            const getFile = file => file.originalname === originalname;
-            return {
-                desc,
-                media: originalname === '' ? '' : files.find(getFile).filename
-            };
-        };
-        const setMedia = () => {
-            const originalname = media.shift();
-            if(originalname === '') {
-                return '';
-            }
-            const getFile = file => file.originalname === originalname;
-            return files.find(getFile).filename;
-        };
-        body.thumb = setMedia();
-        body.media = setMedia();
+        };*/
+        const setDesc = (desc, idx) => ({
+            desc,
+            media: media[idx]
+        });
+        body.thumb = media.shift();
+        body.media = media.shift();
         body.options = body.options.map(setDesc);
-        (new Poll(body)).save(saveCb);
+        fs.writeFile(`${folder}/uploads/${body.folder}/poll.json`, JSON.stringify(body), err => {
+            if(err) {
+                return console.log(err);
+            }
+            console.log("The file was saved!");
+        });
+        //(new Poll(body)).save(saveCb);
     };
     const listPolls = (req, res) => {
         const order = req.query.order || 'most-recent';
