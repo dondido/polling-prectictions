@@ -2,9 +2,9 @@
 ${docs.map(d => `
 	<article itemscope itemtype="http://schema.org/Question" class="question-tile">
 		<a class="question-tile-content" href="/poll/${d.url}">
-			<img itemprop="image" src="/uploads/${d.thumb}" alt="Poll image" class="question-tile-image"/>
+			<img itemprop="image" src="uploads/${d.created}/${d.thumb}" alt="Poll image" class="question-tile-image"/>
 		    <div itemprop="text" class="question-tile-text">${d.desc}</div>
-		    <div class="question-tile-date">Posted on <time itemprop="dateCreated" datetime="${d.created.toISOString()}">${d.created.toISOString().substr(0, 10)}</time></div>
+		    <div class="question-tile-date">Posted on <time itemprop="dateCreated" datetime="${(new Date(d.created)).toISOString()}">${(new Date(d.created)).toISOString().substr(0, 10)}</time></div>
 	    </a>
     </article>
   `).join('')}

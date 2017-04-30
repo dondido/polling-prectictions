@@ -25,12 +25,32 @@
   <main id="main" role="main" itemscope itemprop="mainContentOfPage">
     <setion class="main-content">${main}</setion>
   </main>
-  <script src="/js/services/http.js"></script>
-  <script src="/js/services/import.js"></script>
-  <script src="/js/services/live.js"></script>
-  <script src="/js/services/cookie.js"></script>
-  <script src="/js/views/FormHandler.js"></script>
-  <script src="/js/controllers/Router.js"></script>
-  <script src="/index.js"></script>
+  <script>
+    const $import = url => {
+      const handleImport = (resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.onload = () => {
+          resolve(script.module);
+          script.remove();
+        };
+        script.onerror = () => {
+          reject(new Error('Failed to load module script with URL ' + url));
+          script.remove();
+        };
+        document.documentElement.appendChild(script);
+      }
+      return new Promise(handleImport);
+    }
+    const ready = () => (new Router).init();
+    Promise.all([
+      '/js/services/http.js',
+      '/js/services/live.js',
+      '/js/services/cookie.js',
+      '/js/views/FormHandler.js',
+      '/js/controllers/Router.js',
+    ].map($import)).then(ready);
+  </script>
 </body>
 </html>

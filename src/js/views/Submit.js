@@ -1,6 +1,9 @@
 class Submit extends FormHandler {
 	constructor() {
 		const $scope = document.querySelector('.main-content');
+		if(prevRoute) {
+			$scope.innerHTML = htmls.submit;
+		}
 		const $form = document.forms.submit;
 		const uploadFile = e => this.changeFile(e);
 		const attachListener = $el => $el.addEventListener('change', uploadFile);
@@ -10,9 +13,6 @@ class Submit extends FormHandler {
 		const hideMediaModal = () => this.hideMediaModal();
 		const setVideo = () => this.setVideo();
 		const addAnswer = () => this.addAnswer();
-		if(prevRoute) {
-			$scope.innerHTML = htmls.submit;
-		}
 		super($scope);
 		this.$form = $form;
 		this.answer = $form.querySelector('.option-block').outerHTML;

@@ -14,7 +14,7 @@ class Router {
       const imports = [];
       const assignContent = (content, idx) => {
         const path = names[idx];
-        const filename = getFileName(path)
+        const filename = getFileName(path);
         if(path.slice(-4) === 'html'){
           htmls[filename] = content;
         }

@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     Option = new Schema({
+        _id: false,
         votes: [String],
         desc: { 
             type: String,
@@ -28,20 +29,19 @@ var mongoose = require('mongoose'),
     Poll = new Schema({
         appendix:{ 
             type: String,
-            required: true,
             maxlength: 1024,
         },
         thumb: {
             type: String,
             maxlength: 64,
         },
-        folder: Number,
         media: {
             type: String,
             maxlength: 128,
         },
         desc: { 
             type: String,
+            required: true,
             maxlength: 2048,
         },
         url: { 
@@ -49,14 +49,10 @@ var mongoose = require('mongoose'),
             required: true,
             maxlength: 512,
         },
-        multi: {
-            type: Boolean,
-            default: false
-        },
         tags: [String],
         options: [Option],
         comments: [Comment],
         expire: Date,
-        created: {type: Date, default: Date.now}
+        created: Number
     });
 module.exports = mongoose.model('Poll', Poll);

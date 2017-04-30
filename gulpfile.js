@@ -4,7 +4,39 @@ var gulp = require('gulp'),
   jshint = require('gulp-jshint'),
   htmlmin = require('gulp-htmlmin'),
   moreCSS = require('gulp-more-css'),
+  imagemin = require('gulp-imagemin'),
   imageOptim = require('gulp-imageoptim');
+
+const mongoose = require('mongoose'),
+  fs = require('fs'),
+  Poll = require(__dirname + '/app/models/poll'),
+  uristring = process.env.MONGOLAB_URI ||
+  process.env.MONGOHQ_URL ||
+  'mongodb://localhost/polls';
+
+gulp.task('insert', () => {
+  mongoose.connect(uristring, err => {
+    const folder = process.argv[process.argv.indexOf('--folder') + 1];
+    const insertJson = (err, data) => {
+      if (err) throw err;
+      const deleteFile = (err, data) => {
+        if (err) throw err;
+        console.log('File inserted in MongoDB: ', data);
+      };
+      (new Poll(JSON.parse(data))).save(deleteFile);
+      gulp.src('uploads/' + folder + '/*.{gif,jpg,jpeg,svg,png}')
+        .pipe(imagemin(
+          [imagemin.svgo({plugins: [{removeViewBox: true}]})],
+          {verbose: true}
+        ))
+        .pipe(size())
+        .pipe(gulp.dest('src/uploads/' + folder))
+        .on('end', () => del.sync(['uploads/' + folder]));
+    };
+    fs.readFile(`${__dirname}/uploads/${folder}/poll.json`, 'utf8', insertJson);
+  });
+});
+
 gulp.task('clean', () =>
   del.sync(['./dist/**'])
 );
@@ -39,5 +71,5 @@ gulp.task('lint', () =>
     .pipe(jshint('.jshintrc'))
     .pipe(jshint.reporter('jshint-stylish'))
 );
-gulp.task('js', ['movejs'], () => gulp.start('jspm'));
+gulp.task('submit', ['insert']);
 gulp.task('build', ['clean', 'html', 'movejs', 'css', 'images']) // build for production

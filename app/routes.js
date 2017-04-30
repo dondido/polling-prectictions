@@ -1,6 +1,8 @@
 const merge = require('merge'),
     fs = require('fs'),
     path1 = require('path'),
+    urls = new Map(),
+    xhrs = new Map(),
     es6Renderer = require('express-es6-template-engine'),
     perPage = 2,
     exist = require(__dirname + '/../custom_modules/module-exist'),
@@ -48,13 +50,14 @@ module.exports = function (app, Poll) {
     };
     const storage = multer.diskStorage({
         destination(req, file, callback) {
-            req.body.folder = req.body.folder || Date.now();
-            const uploadPath = `${folder}/uploads/${req.body.folder}`;
+            const {body} = req;
+            body.created = body.created || Date.now();
+            const uploadPath = `${folder}/uploads/${body.created}`;
             const setPath = () => callback(null, uploadPath);
             fs.mkdir(uploadPath, setPath);
         },
-        filename(req, file, cb) {
-            cb(null, file.originalname);
+        filename(req, file, callback) {
+            callback(null, file.originalname);
         },
     });
     const upload = multer({
@@ -166,7 +169,8 @@ module.exports = function (app, Poll) {
         body.thumb = media.shift();
         body.media = media.shift();
         body.options = body.options.map(setDesc);
-        fs.writeFile(`${folder}/uploads/${body.folder}/poll.json`, JSON.stringify(body), err => {
+        body.created = body.created || Date.now();
+        fs.writeFile(`/uploads/${body.created}/poll.json`, JSON.stringify(body), err => {
             if(err) {
                 return console.log(err);
             }
@@ -175,6 +179,18 @@ module.exports = function (app, Poll) {
         //(new Poll(body)).save(saveCb);
     };
     const listPolls = (req, res) => {
+        const {url} = req;
+        const contentMap = req.xhr ? xhrs : urls;
+        const urlContent = contentMap.get(url);
+        const setContent = content => {
+            // put the latest url last
+            contentMap.delete(url);
+            contentMap.set(url, content);
+            res.send(content);
+        };
+        if(urlContent) {
+            return setContent(urlContent);
+        }
         const order = req.query.order || 'most-recent';
         const page = req.query.page || 1;
         const tags = req.params.tag;
@@ -183,10 +199,16 @@ module.exports = function (app, Poll) {
             const countDocs = n => {
                 const renderPage = docs => {
                     const locals = {docs, pagination: createPaginaton(n, + page, order)};
-                    const sendContent = (err, content) => res.send(content);
+                    const sendContent = (err, urlContent) => {
+                        setContent(urlContent);
+                        if(contentMap.size > 100) {
+                            contentMap.delete(Array.from(contentMap.keys())[0]);
+                        }
+                    };
                     return req.xhr ? 
                         es6Renderer(folder + '/html/home.html', {locals}, sendContent) :
-                        res.render('index', {locals, partials: {main: folder + '/html/home.html'}});
+                        es6Renderer(folder + '/index.html', {locals, partials: {main: folder + '/html/home.html'}}, sendContent);
+                        //res.render('index', {locals, partials: {main: folder + '/html/home.html'}});
                 };
                 Poll.find(query).skip(perPage * (page - 1)).limit(perPage).exec().then(renderPage);
             };
