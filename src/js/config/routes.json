@@ -2,7 +2,13 @@
     "/": [
         ["html/home.html", "js/views/Home.js"]
     ],
-    "submit": [
+    "/tags": [
+        ["html/tags.html", "js/views/Tags.js"]
+    ],
+    "/submit": [
+        ["html/submit.html", "js/views/Submit.js"]
+    ],
+    "/poll/.*": [
         ["html/submit.html", "js/views/Submit.js"]
     ]
 }

@@ -74,10 +74,10 @@ class Router {
           return;
         }
       }
-    } while(el === el.parentNode);
-  }
-  getRoute(path) {
-    return path === '/' ? '/' : path.replace(/\//g, '');
+      el = el.parentNode;
+    } while(el !== el.parentNode);
+    console.log(112, el === el.parentNode);
+    console.log(113, el);
   }
   get prevRoute() {
     return prevRoute;
@@ -86,12 +86,14 @@ class Router {
     prevRoute = route;
   }
   getPage(ref) {
-    return this.routes[ref];
+    // new RegExp('^account\/os\/.*\/call_back$').test("1account/os/1234567/call_back")
+    const matchPath = path => new RegExp(`^${path}$`).test(ref);
+    return this.routeMap[this.routePaths.find(matchPath)];
   }
   /* Determines the current route by mathcing current location pathname to
   routes map, and returning the route entry with all of its properties. */
   handleRouteChange() {
-    var page = this.getPage(this.getRoute(location.pathname));
+    var page = this.getPage(location.pathname);
     if(page) {
       /*if(history.state && history.state.account !== User.account) {
         history.replaceState({account: User.account}, '', '/');
@@ -108,7 +110,8 @@ class Router {
   // Starts the SPA app router and processes the  view initialisation
   init() {
     var success = routes => {
-        this.routes = JSON.parse(routes);
+        this.routeMap = JSON.parse(routes);
+        this.routePaths = Object.keys(this.routeMap);
         /* As we don't want to make an extra Ajax request to check
         whether the user is logged in or not we set this data as
         part of a document body classList. */
@@ -120,7 +123,7 @@ class Router {
     document.addEventListener('click', e => this.handleClick(e));
     $http({
       method: 'GET', 
-      url: 'js/config/routes.json'
+      url: '/js/config/routes.json'
     }).then(success, error);
   }
 }

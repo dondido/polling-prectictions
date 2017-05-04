@@ -52,8 +52,8 @@ module.exports = function (app, Poll) {
         destination(req, file, callback) {
             const {body} = req;
             body.created = body.created || Date.now();
-            const uploadPath = `${folder}/uploads/${body.created}`;
-            const setPath = () => callback(null, uploadPath);
+            const uploadPath = `uploads/${body.created}`;
+            const setPath = (a, b) => callback(null, uploadPath);
             fs.mkdir(uploadPath, setPath);
         },
         filename(req, file, callback) {
@@ -76,25 +76,15 @@ module.exports = function (app, Poll) {
     app.set('views', folder);
     app.set('view engine', 'html');
 
-    const baseRoutes = ['/submit'];
     const getBaseParams = (req, url) => ({
         locals: {
             token: req.csrfToken()
         },
         partials: {main: folder + '/html/' + (url || req.url) + '.html'}
     });
-    const getFileName = path => path.split("/").pop().split(".")[0];
-    const renderSubmitComponent = (req, res) => {
-        const dict = {
-            locals: {
-                token: req.csrfToken()
-            }
-        };
-        const sendContent = (err, content) => res.send(content);
-        return es6Renderer(folder + req.url, dict, sendContent);
-    };
-    const baseRender = (req, res) => res.render('index', getBaseParams(req));
-    const pollRender = (req, res) => {
+    const renderAjaxForm = (req, res) => fs.readFile(`${folder}/${req.url}`, 'utf8', res.locals.setContent);
+    const renderBaseForm = (req, res) => res.render('index', getBaseParams(req));
+    const renderPoll = (req, res) => {
         const sendPage = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
             const voted = doc.options.some(checkVotes);
@@ -170,7 +160,7 @@ module.exports = function (app, Poll) {
         body.media = media.shift();
         body.options = body.options.map(setDesc);
         body.created = body.created || Date.now();
-        fs.writeFile(`/uploads/${body.created}/poll.json`, JSON.stringify(body), err => {
+        fs.writeFile(`uploads/${body.created}/poll.json`, JSON.stringify(body), err => {
             if(err) {
                 return console.log(err);
             }
@@ -178,19 +168,54 @@ module.exports = function (app, Poll) {
         });
         //(new Poll(body)).save(saveCb);
     };
-    const listPolls = (req, res) => {
+    const mapContent = (req, res, next) => {
         const {url} = req;
         const contentMap = req.xhr ? xhrs : urls;
         const urlContent = contentMap.get(url);
-        const setContent = content => {
+        console.log(121, urlContent, url)
+        const setContent = (err, content) => {
             // put the latest url last
             contentMap.delete(url);
             contentMap.set(url, content);
             res.send(content);
         };
+        const truncateContent = () => {
+            if(contentMap.size > 100) {
+                contentMap.delete(Array.from(contentMap.keys())[0]);
+            };
+        };
         if(urlContent) {
-            return setContent(urlContent);
+            return setContent(null, urlContent);
         }
+        res.locals.setContent = (err, content) => {
+            setContent(null, content);
+            truncateContent();
+        };
+        next();
+    };
+    const listTags = (req, res) => {
+        const compile = (err, docs) => {
+            const savePage = (err, content, page) => {
+                fs.writeFile(`${folder}/html/compiled/${page}.html`, content, err => {
+                    if(err) {
+                        return console.log(err);
+                    }
+                    console.log("The file was saved!");
+                });
+            };
+            const saveTags = (err, content) => savePage(err, content, 'tags');
+            const tags = {};
+            const extractTags = (total, doc) => total.concat(doc.tags);
+            const countTags = i => tags[i] = tags[i] + 1 || 1;
+            docs.reduce(extractTags, []).forEach(countTags);
+            return req.xhr ? 
+                es6Renderer(folder + '/html/tags.html', {locals: {tags}}, res.locals.setContent) :
+                es6Renderer(folder + '/index.html', {locals: {tags}, partials: {main: folder + '/html/tags.html'}}, res.locals.setContent);
+        }
+        Poll.find().exec(compile);
+    };
+    const listPolls = (req, res) => {
+        console.log(112, res.locals.setContent)
         const order = req.query.order || 'most-recent';
         const page = req.query.page || 1;
         const tags = req.params.tag;
@@ -199,16 +224,9 @@ module.exports = function (app, Poll) {
             const countDocs = n => {
                 const renderPage = docs => {
                     const locals = {docs, pagination: createPaginaton(n, + page, order)};
-                    const sendContent = (err, urlContent) => {
-                        setContent(urlContent);
-                        if(contentMap.size > 100) {
-                            contentMap.delete(Array.from(contentMap.keys())[0]);
-                        }
-                    };
                     return req.xhr ? 
-                        es6Renderer(folder + '/html/home.html', {locals}, sendContent) :
-                        es6Renderer(folder + '/index.html', {locals, partials: {main: folder + '/html/home.html'}}, sendContent);
-                        //res.render('index', {locals, partials: {main: folder + '/html/home.html'}});
+                        es6Renderer(folder + '/html/home.html', {locals}, res.locals.setContent) :
+                        es6Renderer(folder + '/index.html', {locals, partials: {main: folder + '/html/home.html'}}, res.locals.setContent);
                 };
                 Poll.find(query).skip(perPage * (page - 1)).limit(perPage).exec().then(renderPage);
             };
@@ -216,13 +234,12 @@ module.exports = function (app, Poll) {
         }
     };
 
-    app.get(baseRoutes, baseRender);
-    app.get('/poll/:poll', pollRender);
+    app.get('/poll/:poll', renderPoll);
     app.post('/poll/:poll', vote);
     //Beware, you need to match .single() with whatever name="" of your file upload field in html
     app.post('/submit', upload.array('photos'), handleSubmit);
-    app.get('/tags', (req, res) => res.render('index', {partials: {main: folder + '/html/compiled/tags.html'}}));
-    app.get(['/', '/tags/:tag'], listPolls);
-    app.get('/html/submit.html', renderSubmitComponent);
-    app.get('/html/home.html', listPolls);
+    app.get(['/tags',  '/html/tags.html'], mapContent, listTags);
+    app.get(['/', '/html/home.html', '/tags/:tag'], mapContent, listPolls);
+    app.get('/submit', renderBaseForm);
+    app.get('/html/submit.html', mapContent, renderAjaxForm);
 };
