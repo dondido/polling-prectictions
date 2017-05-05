@@ -3,17 +3,19 @@ import {$import} from 'js/services/import.js';
 import Page from 'js/views/page.js';
 import User from 'js/models/user.js';*/
 let prevRoute;
-const classes = {};
+var classes = classes || {};
 const htmls = {};
 /*let firstRender = true;*/
-const getFileName = path => path.split("/").pop().split(".")[0];
+const getFilename = path => path.match(/([^/]*?)(?:\..*)?$/)[1] || 'home';
 class Router {
   getFile(files) {
     const names = [];
     const imports = [];
+    const contents = [];
+    const scripts = [];
     const assignContent = (content, idx) => {
       const path = names[idx];
-      const filename = getFileName(path);
+      const filename = getFilename(path);
       if(path.slice(-3) === '.js'){
         new classes[filename]();
       }
@@ -25,26 +27,27 @@ class Router {
       contents.forEach(assignContent);
       prevRoute = files;
     };
-    const requestFiles = url => {
-      const importJs = () => {
-        names.push(url);
-        imports.push(getFileName(url) in classes ? Promise.resolve() : $import(url));
-      };
-      if(prevRoute === undefined) {
-        if(url.slice(-3) === '.js') {
-          importJs();
-        }
-        return;
-      }
-      if(url.slice(-3) === '.js') {
-        importJs();
-      }
-      else {
-        names.push(url);
-        imports.push($http(url + location.search));
-      }
+    const importScript = url => {
+      names.push(url);
+      imports.push(getFilename(url) in classes ? Promise.resolve() : $import(url));
     };
-    [location.pathname].concat(files).forEach(requestFiles);
+    const importContent = url => {
+      names.push(url);
+      imports.push($http(url + location.search));
+    };
+    const split = url => (url.slice(-3) === '.js' ? scripts.push(url) : contents).push(url);
+    files.forEach(split);
+    if(prevRoute) {
+      contents.push(location.pathname);
+      contents.forEach(importContent);
+      scripts.forEach(importScript);
+      if(scripts.length === 0) {
+        importScript('BaseView.js');
+      }
+    }
+    else {
+      scripts.forEach(importScript);
+    }
     return Promise.all(imports).then(createView);
   }
     

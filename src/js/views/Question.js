@@ -1,7 +1,7 @@
 class Question {
 	constructor() {
 		if(prevRoute) {
-			document.querySelector('.main-content').innerHTML = htmls.question;
+			document.querySelector('.main-content').innerHTML = htmls[location.pathname.match(/([^/]*?)(?:\..*)?$/)[1] || 'home'];
 		}
 	}
 }

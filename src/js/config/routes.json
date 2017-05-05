@@ -1,6 +1,6 @@
 {
-    "/": ["js/views/Home.js"],
-    "/tags": ["js/views/Tags.js"],
+    "/": [],
+    "/tags": [],
     "/submit": ["js/views/Submit.js"],
     "/poll/.*": ["/js/views/Question.js"]
 }
