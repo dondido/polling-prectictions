@@ -5,49 +5,47 @@ import User from 'js/models/user.js';*/
 let prevRoute;
 const classes = {};
 const htmls = {};
-let firstRender = true;
+/*let firstRender = true;*/
 const getFileName = path => path.split("/").pop().split(".")[0];
 class Router {
-  getFile(page) {
-    const mapComponents = page.map(files => {
-      const names = [];
-      const imports = [];
-      const assignContent = (content, idx) => {
-        const path = names[idx];
-        const filename = getFileName(path);
-        if(path.slice(-4) === 'html'){
-          htmls[filename] = content;
-        }
-        else {
-          new classes[filename]();
-        }
+  getFile(files) {
+    const names = [];
+    const imports = [];
+    const assignContent = (content, idx) => {
+      const path = names[idx];
+      const filename = getFileName(path);
+      if(path.slice(-3) === '.js'){
+        new classes[filename]();
+      }
+      else {
+        htmls[filename] = content;
+      }
+    };
+    const createView = contents => {
+      contents.forEach(assignContent);
+      prevRoute = files;
+    };
+    const requestFiles = url => {
+      const importJs = () => {
+        names.push(url);
+        imports.push(getFileName(url) in classes ? Promise.resolve() : $import(url));
       };
-      const createView = contents => contents.forEach(assignContent);
-      const requestFiles = url => {
-        const importJs = () => {
-          names.push(url);
-          imports.push(getFileName(url) in classes ? Promise.resolve() : $import(url));
-        };
-        if(prevRoute === undefined) {
-          if(url.slice(-4) !== 'html') {
-            importJs();
-          }
+      if(prevRoute === undefined) {
+        if(url.slice(-3) === '.js') {
+          importJs();
         }
-        else {
-          if(url.slice(-4) === 'html') {
-            names.push(url)
-            imports.push($http(url + location.search));
-          }
-          else {
-            importJs();
-          }
-        }
-      };
-      files.forEach(requestFiles);
-      return Promise.all(imports).then(createView);
-    });
-    const componentsDidMount = () => prevRoute = page;
-    Promise.all(mapComponents).then(componentsDidMount);
+        return;
+      }
+      if(url.slice(-3) === '.js') {
+        importJs();
+      }
+      else {
+        names.push(url);
+        imports.push($http(url + location.search));
+      }
+    };
+    [location.pathname].concat(files).forEach(requestFiles);
+    return Promise.all(imports).then(createView);
   }
     
   /* Sometimes we have a hyperlink that needs to be a hyperlink but we don’t want it
@@ -58,7 +56,7 @@ class Router {
   the link natural behaviour and redirecting. This architecture help us provide
   graceful degradation functionality and provides key driver of SEO goodnes. */
   handleClick(e) {
-    const el = e.target;
+    let el = e.target;
     /* Event delegation allows us to avoid adding event listeners to specific nodes; 
     instead, the event listener is added to one parent. That event listener analyses
     bubbled events to find a match on child elements. */
@@ -71,13 +69,11 @@ class Router {
           history.pushState({}, page, href);
           this.getFile(page);
           e.preventDefault();
-          return;
+          return 
         }
       }
       el = el.parentNode;
-    } while(el !== el.parentNode);
-    console.log(112, el === el.parentNode);
-    console.log(113, el);
+    } while(el !== document.body);
   }
   get prevRoute() {
     return prevRoute;

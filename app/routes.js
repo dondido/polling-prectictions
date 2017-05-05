@@ -82,8 +82,9 @@ module.exports = function (app, Poll) {
         },
         partials: {main: folder + '/html/' + (url || req.url) + '.html'}
     });
-    const renderAjaxForm = (req, res) => fs.readFile(`${folder}/${req.url}`, 'utf8', res.locals.setContent);
-    const renderBaseForm = (req, res) => res.render('index', getBaseParams(req));
+    const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.url}.html`, 'utf8', res.locals.setContent);
+    const renderHttpForm = (req, res) => res.render('index', getBaseParams(req));
+    const renderBaseForm = (req, res, next) => req.xhr ? next() : renderHttpForm(req, res);
     const renderPoll = (req, res) => {
         const sendPage = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
@@ -93,6 +94,7 @@ module.exports = function (app, Poll) {
             };
             const renderPage = (err, content) => {
                 dict.locals.questionContent = content;
+                console.log(111, content);
                 dict.partials = {main: folder + '/html/question.html'};
                 res.render('index', dict);
             };
@@ -172,8 +174,9 @@ module.exports = function (app, Poll) {
         const {url} = req;
         const contentMap = req.xhr ? xhrs : urls;
         const urlContent = contentMap.get(url);
-        console.log(121, urlContent, url)
+        console.log(121, urlContent, url, next)
         const setContent = (err, content) => {
+            console.log(122, err, content)
             // put the latest url last
             contentMap.delete(url);
             contentMap.set(url, content);
@@ -234,12 +237,11 @@ module.exports = function (app, Poll) {
         }
     };
 
-    app.get('/poll/:poll', renderPoll);
+    app.get(['/poll/:poll'], renderPoll);
     app.post('/poll/:poll', vote);
     //Beware, you need to match .single() with whatever name="" of your file upload field in html
     app.post('/submit', upload.array('photos'), handleSubmit);
     app.get(['/tags',  '/html/tags.html'], mapContent, listTags);
-    app.get(['/', '/html/home.html', '/tags/:tag'], mapContent, listPolls);
-    app.get('/submit', renderBaseForm);
-    app.get('/html/submit.html', mapContent, renderAjaxForm);
+    app.get(['/', '/tags/:tag'], mapContent, listPolls);
+    app.get('/submit', renderBaseForm, mapContent, renderAjaxForm);
 };

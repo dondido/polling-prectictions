@@ -1,14 +1,6 @@
 {
-    "/": [
-        ["html/home.html", "js/views/Home.js"]
-    ],
-    "/tags": [
-        ["html/tags.html", "js/views/Tags.js"]
-    ],
-    "/submit": [
-        ["html/submit.html", "js/views/Submit.js"]
-    ],
-    "/poll/.*": [
-        ["html/submit.html", "js/views/Submit.js"]
-    ]
+    "/": ["js/views/Home.js"],
+    "/tags": ["js/views/Tags.js"],
+    "/submit": ["js/views/Submit.js"],
+    "/poll/.*": ["/js/views/Question.js"]
 }
