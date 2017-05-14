@@ -7,37 +7,8 @@ const merge = require('merge'),
     perPage = 2,
     exist = require(__dirname + '/../custom_modules/module-exist'),
     multer = require('multer'),
-    createPaginaton = (total, page = 1, order) => {
-        const pages = 3;
-        const last = Math.ceil( total / perPage );
-        const prev = page - pages - Math.max(page + pages - last, 0);
-        const start = prev > 1 ? prev : 1;
-        const next = page + pages + Math.max(pages - page + 1, 0);
-        const end = next < last ? next : last;
-        const params = `href=/?order=${order}&page=`;
-        let html = `<li class="pagination-prev">${page !== 1 ? `<a rel="prev" ${params + (page - 1)}></a>` : ''}</li>`;
-        if (start > 1) {
-            html += `<li class="pagination-item"><a ${params + 1} rel="prev">1</a>`;
-            if(start !== 2) {
-                html += '<li class="pagination-period">'
-            }
-        }
-        for ( let i = start; i < page; i ++) {
-            html += `<li class="pagination-item"><a rel="prev" ${params + i}>${i}</a>`;
-        }
-        html += `<li class="pagination-current">${page}`;
-        for (let i = page + 1 ; i <= end; i ++) {
-            html += `<li class="pagination-item"><a rel="next" ${params + i}>${i}</a>`;
-        }
-        if (end < last) {
-            if(end !== last - 1) {
-                html += '<li class="pagination-period">'
-            }
-            html += `<li class="pagination-item"><a ${params + last} rel="next">${last}</a>`;
-        }
-        html += `<li class="pagination-next">${page !== last ? `<a ${params + (page + 1)} rel="next"></a>` : ''}</li>`;
-        return html;
-    };
+    createPaginaton = require('./components/create-pagination'),
+    insertOptionMedia = require('./components/insert-option-media');
 
 module.exports = function (app, Poll) {
     const folder = app.get('folder');
@@ -73,87 +44,66 @@ module.exports = function (app, Poll) {
         }
     });
     app.engine('html', es6Renderer);
-    app.set('views', folder);
+    app.set('views', folder + '/html');
     app.set('view engine', 'html');
 
     const getBaseParams = (req, url) => ({
         locals: {
             token: req.csrfToken()
         },
-        partials: {main: folder + '/html/' + (url || req.url) + '.html'}
+        partials: {main: url || req.url}
     });
     const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.url}.html`, 'utf8', res.locals.setContent);
     const renderHttpForm = (req, res) => res.render('index', getBaseParams(req));
     const renderBaseForm = (req, res, next) => req.xhr ? next() : renderHttpForm(req, res);
-    const renderPoll = (req, res) => {
-        const sendPage = doc => {
+    const renderVote = (req, res) => {
+        const {locals} = res;
+        const renderPage = (err, content) => {
+            const sendPage = (err, page) => res.send(page);
+            locals.questionContent = content;
+            if(req.xhr) {
+                return app.render('question', {locals}, sendPage);
+            }
+            res.render('index', {locals, partials: {main: 'question'}});
+        };
+        locals.allVotes = locals.doc.options.reduce((t, o) => t + o.votes.length, 0);
+        locals.insertOptionMedia = insertOptionMedia;
+        app.render(locals.page, {locals}, renderPage);
+    };
+    const renderPoll = (req, res, next) => {
+        const {locals} = res;
+        const compilePage = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
             const voted = doc.options.some(checkVotes);
-            const dict = {
-                locals: {doc},
-            };
-            const renderPage = (err, content) => {
-                dict.locals.questionContent = content;
-                console.log(111, content);
-                dict.partials = {main: folder + '/html/question.html'};
-                res.render('index', dict);
-            };
-            dict.locals.allVotes = doc.options.reduce((t, o) => t + o.votes.length, 0);
+            locals.doc = doc;
             if(voted) {
-                return es6Renderer(folder + '/html/question-results.html', dict, renderPage);
+                locals.page = 'question-results';
+                return next();
             }
-            dict.locals.token = req.csrfToken();
-            es6Renderer(folder + '/html/question-form.html', dict, renderPage);
+            locals.token = req.csrfToken();
+            locals.page = 'question-form';
+            next();
         }
-        console.log('req.params.poll', req.params.poll)
-        return Poll.findOne({url: req.params.poll}).exec().then(sendPage);
+        return Poll.findOne({url: req.params.poll}).exec().then(compilePage);
     };
-    const vote = (req, res) => {
+    const vote = (req, res, next) => {
+        const {locals} = res;
         const registerAnswer = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
             const voted = doc.options.some(checkVotes);
-            if (voted) {
-                return redirectHash(req, res, 'back');
+            if(voted === false) {
+                doc.options[req.body.answer].votes.push(req.sessionID);
+                doc.save();
             }
-            doc.options[req.body.answer].votes.push(req.sessionID);
-            doc.save();
-            return redirectHash(req, res, 'back');
+            locals.doc = doc;
+            locals.page = 'question-results';
+            next();
         };
         Poll.findOne({url: req.params.poll}).exec().then(registerAnswer);
-        
-        /*const query = Poll.find({'options.votes': { "in" : [req.user.email]}});
-        return query.exec().then(doc => console.log(123, doc));*/
     };
     const handleSubmit = (req, res) => {
-        console.log(req.files, res.files)
         const {body, files} = req;
         const {media} = body;
-        /*const saveCb = error => {
-            console.log("Your poll has been saved!");
-            const compile = (err, docs) => {
-                const savePage = (err, content, page) => {
-                    fs.writeFile(`${folder}/html/compiled/${page}.html`, content, err => {
-                        if(err) {
-                            return console.log(err);
-                        }
-                        console.log("The file was saved!");
-                    });
-                };
-                const saveHome = (err, content) => savePage(err, content, 'home');
-                const saveTags = (err, content) => savePage(err, content, 'tags');
-                const tags = {};
-                const extractTags = (total, doc) => total.concat(doc.tags);
-                const countTags = i => tags[i] = tags[i] + 1 || 1;
-                docs.reduce(extractTags, []).forEach(countTags);
-                es6Renderer(folder + '/html/home.html', {locals: {docs, pagination: createPaginaton(docs.length)}}, saveHome);
-                es6Renderer(folder + '/html/tags.html', {locals: {tags}}, saveTags);
-            }
-            if (error) {
-                console.error(error);
-            }
-            Poll.find().limit(10).exec(compile);
-            req.xhr ? res.end() : res.redirect('#submitted');
-        };*/
         const setDesc = (desc, idx) => ({
             desc,
             media: media[idx]
@@ -162,21 +112,21 @@ module.exports = function (app, Poll) {
         body.media = media.shift();
         body.options = body.options.map(setDesc);
         body.created = body.created || Date.now();
+        console.log(122, JSON.stringify(body))
         fs.writeFile(`uploads/${body.created}/poll.json`, JSON.stringify(body), err => {
             if(err) {
                 return console.log(err);
             }
             console.log("The file was saved!");
         });
+        req.xhr ? res.end() : res.redirect('#submitted');
         //(new Poll(body)).save(saveCb);
     };
     const mapContent = (req, res, next) => {
         const {url} = req;
         const contentMap = req.xhr ? xhrs : urls;
         const urlContent = contentMap.get(url);
-        console.log(121, urlContent, url, next)
         const setContent = (err, content) => {
-            console.log(122, err, content)
             // put the latest url last
             contentMap.delete(url);
             contentMap.set(url, content);
@@ -212,13 +162,12 @@ module.exports = function (app, Poll) {
             const countTags = i => tags[i] = tags[i] + 1 || 1;
             docs.reduce(extractTags, []).forEach(countTags);
             return req.xhr ? 
-                es6Renderer(folder + '/html/tags.html', {locals: {tags}}, res.locals.setContent) :
-                es6Renderer(folder + '/index.html', {locals: {tags}, partials: {main: folder + '/html/tags.html'}}, res.locals.setContent);
+                app.render('tags', {locals: {tags}}, res.locals.setContent) :
+                app.render('index', {locals: {tags}, partials: {main: 'tags'}}, res.locals.setContent);
         }
         Poll.find().exec(compile);
     };
     const listPolls = (req, res) => {
-        console.log(112, res.locals.setContent)
         const order = req.query.order || 'most-recent';
         const page = req.query.page || 1;
         const tags = req.params.tag;
@@ -226,10 +175,10 @@ module.exports = function (app, Poll) {
         if('most-recent' === order) {
             const countDocs = n => {
                 const renderPage = docs => {
-                    const locals = {docs, pagination: createPaginaton(n, + page, order)};
+                    const locals = {docs, pagination: createPaginaton(n, + page, order, perPage)};
                     return req.xhr ? 
-                        es6Renderer(folder + '/html/home.html', {locals}, res.locals.setContent) :
-                        es6Renderer(folder + '/index.html', {locals, partials: {main: folder + '/html/home.html'}}, res.locals.setContent);
+                        app.render('home', {locals}, res.locals.setContent) :
+                        app.render('index', {locals, partials: {main: 'home'}}, res.locals.setContent);
                 };
                 Poll.find(query).skip(perPage * (page - 1)).limit(perPage).exec().then(renderPage);
             };
@@ -237,8 +186,8 @@ module.exports = function (app, Poll) {
         }
     };
 
-    app.get(['/poll/:poll'], renderPoll);
-    app.post('/poll/:poll', vote);
+    app.get(['/poll/:poll'], renderPoll, renderVote);
+    app.post('/poll/:poll', upload.array(), vote, renderVote);
     //Beware, you need to match .single() with whatever name="" of your file upload field in html
     app.post('/submit', upload.array('photos'), handleSubmit);
     app.get(['/tags',  '/html/tags.html'], mapContent, listTags);

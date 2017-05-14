@@ -35,7 +35,7 @@ class Router {
       names.push(url);
       imports.push($http(url + location.search));
     };
-    const split = url => (url.slice(-3) === '.js' ? scripts.push(url) : contents).push(url);
+    const split = url => url.slice(-3) === '.js' ? scripts.push(url) : contents.push(url);
     files.forEach(split);
     if(prevRoute) {
       contents.push(location.pathname);

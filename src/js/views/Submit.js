@@ -39,7 +39,8 @@ class Submit extends FormHandler {
 		const cl = $block.querySelector('.uploaded-title').classList;
 		cl.remove('image-file');
 		cl.add('video-link');
-		$block.querySelector('.media-text').dataset.media = this.$video.src ='https://www.youtube.com/embed/' + this.$videoInput.value.split('?v=').pop();
+		$block.querySelector('.media-text').dataset.media = $block.querySelector('.media-input').value =
+			this.$video.src ='https://www.youtube.com/embed/' + this.$videoInput.value.split('?v=').pop();
 		this.hideMediaModal();
 	}
 	removeAnswer(e) {
@@ -47,7 +48,9 @@ class Submit extends FormHandler {
 		$answer.parentNode.removeChild($answer);
 	}
 	removeMedia(e) {
-		e.target.parentNode.parentNode.querySelector('.uploaded-title').classList.remove('image-file', 'video-link');
+		const $block = e.target.parentNode.parentNode;
+		$block.querySelector('.uploaded-title').classList.remove('image-file', 'video-link');
+		$block.querySelector('.media-input').value = $block.querySelector('.file-input').value = '';
 	}
 	addAnswer() {
 		const uploadFile = e => this.changeFile(e);

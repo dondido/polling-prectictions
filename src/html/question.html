@@ -1,5 +1,6 @@
 <p>
 	<article itemscope itemtype="http://schema.org/Question">
+		${insertOptionMedia(doc.media, doc.created)}
 		<h1 itemprop="name">${doc.desc}</h1>
 	    <p itemprop="text"><a>${doc.appendix}</a></p>
 	    <div><span>Total votes: </span><span itemprop="upvoteCount">${allVotes}</span></div>
