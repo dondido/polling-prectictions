@@ -4,7 +4,7 @@ const merge = require('merge'),
     urls = new Map(),
     xhrs = new Map(),
     es6Renderer = require('express-es6-template-engine'),
-    perPage = 2,
+    perPage = 6,
     exist = require(__dirname + '/../custom_modules/module-exist'),
     multer = require('multer'),
     createPaginaton = require('./components/create-pagination'),
@@ -74,10 +74,11 @@ module.exports = function (app, Poll) {
         const {locals} = res;
         const compilePage = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
-            const voted = doc.options.some(checkVotes);
+            const voteIndex = doc.options.findIndex(checkVotes);
             locals.doc = doc;
-            if(voted) {
+            if(voteIndex !== -1) {
                 locals.page = 'question-results';
+                locals.voteIndex = voteIndex;
                 return next();
             }
             locals.token = req.csrfToken();
@@ -90,11 +91,13 @@ module.exports = function (app, Poll) {
         const {locals} = res;
         const registerAnswer = doc => {
             const checkVotes = option => option.votes.includes(req.sessionID);
-            const voted = doc.options.some(checkVotes);
-            if(voted === false) {
+            const voteIndex = doc.options.findIndex(checkVotes);
+            if(voteIndex === -1) {
                 doc.options[req.body.answer].votes.push(req.sessionID);
                 doc.save();
             }
+            console.log(233, req.body.answer)
+            locals.voteIndex = + req.body.answer;
             locals.doc = doc;
             locals.page = 'question-results';
             next();
