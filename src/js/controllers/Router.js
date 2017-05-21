@@ -91,16 +91,17 @@ class Router {
   }
   /* Determines the current route by mathcing current location pathname to
   routes map, and returning the route entry with all of its properties. */
-  handleRouteChange() {
+  handleRouteChange(e) {
+    console.log(111, e)
     var page = this.getPage(location.pathname);
-    if(page) {
+    if(page && window.location.hash === '') {
       /*if(history.state && history.state.account !== User.account) {
         history.replaceState({account: User.account}, '', '/');
-      }
-      else if(!prevRoute || !history.state) {
-        history.replaceState({account: User.account}, '');
+      }*/
+      if(!prevRoute || !history.state) {
+        history.replaceState({}, '');
       } 
-      if(prevRoute === page.files) {
+      /*if(prevRoute === page.files) {
         return;
       }*/
       this.getFile(page);

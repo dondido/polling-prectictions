@@ -75,5 +75,7 @@ class Submit extends FormHandler {
 		super.submit(e);
 		location.hash = 'submitted';
 	}
+	success(){
+	}
 }
 classes.Submit = Submit;

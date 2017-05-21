@@ -4,6 +4,7 @@
     <p itemprop="text">${doc.appendix}</p>
     <div><span>Total votes: </span><span itemprop="upvoteCount">${allVotes}</span></div>
     ${questionContent}
-    <ul>${doc.tags.map(t => `<li><a>${t}</a></li>`).join('')}</ul>
     <div>Posted on <time itemprop="dateCreated" datetime="${(new Date(doc.created)).toISOString()}">${(new Date(doc.created)).toISOString().substr(0, 10)}</time></div>
+    <div class="question-tags">Tags</div>
+    <ul class="question-tag-list">${doc.tags.map(tag => `<li class="question-tag"><a class="tag-link" href="/tags/${tag}">${tag}</a></li>`).join('')}</ul>
 </article>

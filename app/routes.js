@@ -96,7 +96,6 @@ module.exports = function (app, Poll) {
                 doc.options[req.body.answer].votes.push(req.sessionID);
                 doc.save();
             }
-            console.log(233, req.body.answer)
             locals.voteIndex = + req.body.answer;
             locals.doc = doc;
             locals.page = 'question-results';
@@ -115,6 +114,7 @@ module.exports = function (app, Poll) {
         body.media = media.shift();
         body.options = body.options.map(setDesc);
         body.created = body.created || Date.now();
+        body.tags = body.tags.split(',').slice(0, 5);
         console.log(122, JSON.stringify(body))
         fs.writeFile(`uploads/${body.created}/poll.json`, JSON.stringify(body), err => {
             if(err) {
@@ -122,6 +122,7 @@ module.exports = function (app, Poll) {
             }
             console.log("The file was saved!");
         });
+        console.log(111, req.xhr, res.end)
         req.xhr ? res.end() : res.redirect('#submitted');
         //(new Poll(body)).save(saveCb);
     };
