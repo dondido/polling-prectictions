@@ -1,6 +1,0 @@
-{
-    "/": [],
-    "/tags": [],
-    "/submit": ["js/views/Submit.js"],
-    "/poll/.*": ["/js/views/Question.js"]
-}

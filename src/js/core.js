@@ -96,7 +96,7 @@ class Router {
         /* Event delegation allows us to avoid adding event listeners to specific nodes; 
         instead, the event listener is added to one parent. That event listener analyses
         bubbled events to find a match on child elements. */
-        do {
+        while (el && el !== document.body) {
             if(el.nodeName === 'A') {
             const href = el.getAttribute('href');
             const page = this.getPage(href.split('?')[0] || '/');
@@ -108,7 +108,7 @@ class Router {
                 }
             }
             el = el.parentNode;
-        } while(el !== document.body);
+        };
     }
     getPage(ref) {
         // new RegExp('^account\/os\/.*\/call_back$').test("1account/os/1234567/call_back")
@@ -128,6 +128,10 @@ class Router {
         this.routeMap = {
             '/': [],
             '/tags': [],
+            '/about': [],
+            '/terms': [],
+            '/privacy': [],
+            '/contact': [],
             '/submit': ['js/views/Submit.js'],
             '/poll/.*': ['/js/views/Question.js']
         }

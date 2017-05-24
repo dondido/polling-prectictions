@@ -46,15 +46,14 @@ module.exports = function (app, Poll) {
     app.engine('html', es6Renderer);
     app.set('views', folder + '/html');
     app.set('view engine', 'html');
-
-    const getBaseParams = (req, url) => ({
-        locals: {
-            token: req.csrfToken()
-        },
-        partials: {main: url || req.url}
-    });
+    const renderBase = (req, res) => {
+        console.log(222, 1)
+        return req.xhr ? 
+        app.render(req.path.slice(1), {}, res.locals.setContent) :
+        app.render('index', {partials: {main: req.path}}, res.locals.setContent);
+    }
     const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.path}.html`, 'utf8', res.locals.setContent);
-    const renderHttpForm = (req, res) => res.render('index', getBaseParams(req));
+    const renderHttpForm = (req, res) => res.render('index', {locals: {token: req.csrfToken()}, partials: {main: req.path}});
     const renderBaseForm = (req, res, next) => req.xhr ? next() : renderHttpForm(req, res);
     const renderVote = (req, res) => {
         const {locals} = res;
@@ -131,6 +130,7 @@ module.exports = function (app, Poll) {
         const contentMap = req.xhr ? xhrs : urls;
         const urlContent = contentMap.get(url);
         const setContent = (err, content) => {
+            console.log(111, err, content)
             // put the latest url last
             contentMap.delete(url);
             contentMap.set(url, content);
@@ -189,7 +189,7 @@ module.exports = function (app, Poll) {
             Poll.count(query).exec().then(countDocs);
         }
     };
-
+    app.get(['/about', '/terms', '/privacy', '/contact'], mapContent, renderBase);
     app.get(['/poll/:poll'], renderPoll, renderVote);
     app.post('/poll/:poll', upload.array(), vote, renderVote);
     //Beware, you need to match .single() with whatever name="" of your file upload field in html

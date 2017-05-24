@@ -13,20 +13,19 @@ body {
         font-size: 1em;
     }
 }
-#main {
+#main,
+.footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 2ex;
 }
-.tags-page,
-.submit-page {
+.page {
     position: relative;
     min-width: 16em;
     border-radius: 2px;
     margin: .8em;
     padding: .8em;
-    max-width: 32em;
+    max-width: 34em;
 }
 h2,
 h3 {
@@ -37,6 +36,7 @@ h3 {
     color: #5264AE;
 }
 a {
+    text-decoration: none;
     color: rgb(65, 183, 216);
 }
 button {
@@ -101,7 +101,6 @@ button:focus,
     margin-bottom: 2ex;
 }
 .header-logo-link {
-    text-decoration: none;
     color: white;
 }
 .header-content {
@@ -130,7 +129,6 @@ button:focus,
 .nav-link {
     display: inline-block;
     padding: 1.4ex .8em;
-    text-decoration: none;
     color: #6F6F6F;
     transition: background-color .5s ease;
 }
@@ -147,8 +145,7 @@ button:hover {
     margin: 0;
     padding: 1.4ex .8em;
 }
-.tags-title,
-.submit-title {
+.page-title {
     font-size: 1.4em;
     font-weight: normal;
     border-bottom: 1px solid darkgray;
@@ -235,7 +232,6 @@ button:hover {
 .question-tile-content {
     position: relative;
     color: white;
-    text-decoration: none;
     display: block;
     height: 100%;
 }
@@ -591,6 +587,27 @@ button:hover {
     padding: 0;
 }
 .tag-link {
-    text-decoration: none;
     color: rgb(65, 183, 216);
+}
+.footer-content {
+    margin-top: 1ex;
+    padding-top: 1ex;
+    width: 34em;
+    border-top: 1px solid darkgray;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.footer-link {
+    margin: 0 .4em;
+}
+.credentials {
+    padding: 1ex;
+    width: 100%;
+    text-align: center;
+}
+.about,
+.terms {
+    white-space: pre-line;
+    text-align: justify;
 }
