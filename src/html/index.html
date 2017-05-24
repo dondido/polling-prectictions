@@ -26,33 +26,6 @@
   <main id="main" role="main" itemscope itemprop="mainContentOfPage" class="main-content">
     ${main}
   </main>
-  <script>
-    const $import = url => {
-      const handleImport = (resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.async = true;
-        script.onload = () => {
-          resolve(script.module);
-          script.remove();
-        };
-        script.onerror = () => {
-          reject(new Error('Failed to load module script with URL ' + url));
-          script.remove();
-        };
-        document.documentElement.appendChild(script);
-      }
-      return new Promise(handleImport);
-    }
-    const ready = () => (new Router).init();
-    Promise.all([
-      '/js/services/http.js',
-      '/js/services/live.js',
-      '/js/services/cookie.js',
-      '/js/views/FormHandler.js',
-      '/js/controllers/Router.js',
-      '/js/views/BaseView.js'
-    ].map($import)).then(ready);
-  </script>
+  <script src="/js/core.js" async></script>
 </body>
 </html>

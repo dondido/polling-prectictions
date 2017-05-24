@@ -4,7 +4,7 @@ const merge = require('merge'),
     urls = new Map(),
     xhrs = new Map(),
     es6Renderer = require('express-es6-template-engine'),
-    perPage = 6,
+    perPage = 2,
     exist = require(__dirname + '/../custom_modules/module-exist'),
     multer = require('multer'),
     createPaginaton = require('./components/create-pagination'),
@@ -53,7 +53,7 @@ module.exports = function (app, Poll) {
         },
         partials: {main: url || req.url}
     });
-    const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.url}.html`, 'utf8', res.locals.setContent);
+    const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.path}.html`, 'utf8', res.locals.setContent);
     const renderHttpForm = (req, res) => res.render('index', getBaseParams(req));
     const renderBaseForm = (req, res, next) => req.xhr ? next() : renderHttpForm(req, res);
     const renderVote = (req, res) => {

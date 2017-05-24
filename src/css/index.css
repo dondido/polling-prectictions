@@ -19,12 +19,14 @@ body {
     justify-content: center;
     padding-bottom: 2ex;
 }
+.tags-page,
 .submit-page {
     position: relative;
     min-width: 16em;
     border-radius: 2px;
     margin: .8em;
     padding: .8em;
+    max-width: 32em;
 }
 h2,
 h3 {
@@ -35,7 +37,7 @@ h3 {
     color: #5264AE;
 }
 a {
-    color: #4CAF50;
+    color: rgb(65, 183, 216);
 }
 button {
     display: inline-block;
@@ -145,9 +147,11 @@ button:hover {
     margin: 0;
     padding: 1.4ex .8em;
 }
+.tags-title,
 .submit-title {
     font-size: 1.4em;
     font-weight: normal;
+    border-bottom: 1px solid darkgray;
 }
 .burger {
     display: none;
@@ -387,10 +391,11 @@ button:hover {
     display: inline-block;
     width: 2.3em;
     line-height: 4ex;
-    border: 1px solid #4CAF50;
+    border: 1px solid
 }
 .pagination-current {
-    border-color: #333;
+    color: #6F6F6F;
+    border-color: #6F6F6F;
 }
 .pagination-prev a:before,
 .pagination-next a:before,
@@ -403,15 +408,15 @@ button:hover {
 }
 .pagination-prev a:before,
 .pagination-prev:empty:before {
-    border-right: 1px solid #4CAF50;
-    border-bottom: 1px solid #4CAF50;
+    border-right: 1px solid rgb(65, 183, 216);
+    border-bottom: 1px solid rgb(65, 183, 216);
     transform: rotate(135deg);
     margin-right: -.2em;
 }
 .pagination-next a:before,
 .pagination-next:empty:before {
-    border-right: 1px solid #4CAF50;
-    border-bottom: 1px solid #4CAF50;
+    border-right: 1px solid rgb(65, 183, 216);
+    border-bottom: 1px solid rgb(65, 183, 216);
     transform: rotate(-45deg);
     margin-left: -.2em;
 }
@@ -419,7 +424,7 @@ button:hover {
 .pagination-next:empty,
 .pagination-prev:empty:before,
 .pagination-next:empty:before {
-    border-color: #333
+    border-color: #6F6F6F;
 }
 .image-placeholder:hover,
 .option-image-placeholder:hover,
@@ -430,7 +435,6 @@ button:hover {
     width: 4em;
 }
 .submit-form {
-    border-top: 1px solid darkgray;
     width: 64vw;
     max-width: 34em;
     min-width: 18em;
@@ -573,7 +577,8 @@ button:hover {
     word-wrap: break-word;
 }
 .question-tag-list {
-    padding: 0
+    padding: 0;
+    column-width: 10em;
 }
 .question-tags {
     margin-top: 1ex;
@@ -581,9 +586,11 @@ button:hover {
 }
 .question-tag {
     display: inline-block;
+    width: 10em;
     list-style: none;
     padding: 0;
 }
 .tag-link {
+    text-decoration: none;
     color: rgb(65, 183, 216);
 }

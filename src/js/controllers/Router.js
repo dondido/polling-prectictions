@@ -5,6 +5,9 @@ import User from 'js/models/user.js';*/
 let prevRoute;
 var classes = classes || {};
 const htmls = {};
+const getHeader = {
+  'X-Requested-With': 'XMLHttpRequest'
+};
 /*let firstRender = true;*/
 const getFilename = path => path.match(/([^/]*?)(?:\..*)?$/)[1] || 'home';
 class Router {
@@ -33,7 +36,10 @@ class Router {
     };
     const importContent = url => {
       names.push(url);
-      imports.push($http(url + location.search));
+      const urlParams = new URLSearchParams(location.search);
+      urlParams.append('ajax', 1);
+      console.log(222, url, urlParams.toString())
+      imports.push(fetch(url + '?' + urlParams.toString(), {headers: getHeader}).then(res => res.text()));
     };
     const split = url => url.slice(-3) === '.js' ? scripts.push(url) : contents.push(url);
     files.forEach(split);
@@ -92,16 +98,15 @@ class Router {
   /* Determines the current route by mathcing current location pathname to
   routes map, and returning the route entry with all of its properties. */
   handleRouteChange(e) {
-    console.log(111, e)
     var page = this.getPage(location.pathname);
     if(page && window.location.hash === '') {
       /*if(history.state && history.state.account !== User.account) {
         history.replaceState({account: User.account}, '', '/');
-      }*/
-      if(!prevRoute || !history.state) {
-        history.replaceState({}, '');
+      }
+      else if(!prevRoute || !history.state) {
+        history.replaceState({account: User.account}, '');
       } 
-      /*if(prevRoute === page.files) {
+      if(prevRoute === page.files) {
         return;
       }*/
       this.getFile(page);
@@ -110,7 +115,7 @@ class Router {
   // Starts the SPA app router and processes the  view initialisation
   init() {
     var success = routes => {
-        this.routeMap = JSON.parse(routes);
+        this.routeMap = routes;
         this.routePaths = Object.keys(this.routeMap);
         /* As we don't want to make an extra Ajax request to check
         whether the user is logged in or not we set this data as
@@ -121,9 +126,6 @@ class Router {
       error = res => console.log('error', res);
     window.addEventListener('popstate', e => this.handleRouteChange(e));  
     document.addEventListener('click', e => this.handleClick(e));
-    $http({
-      method: 'GET', 
-      url: '/js/config/routes.json'
-    }).then(success, error);
+    fetch('/js/config/routes.json').then(res => res.json()).then(success).catch(error);
   }
 }

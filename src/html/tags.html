@@ -1,6 +1,7 @@
-<div id="tags">
-<ul class="question-tag-list">${Object.keys(tags).map(tag => `
-	<li class="question-tag"><a class="tag-link" href="/tags/${tag}">${tag} (${tags[tag]})</a></li>
-  `).join('')}
-</ul>
+<div class="tags-page">
+<h2 class="tags-title">Tags</h2>
+	<ul class="question-tag-list">${Object.keys(tags).map(tag => `
+		<li class="question-tag"><a class="tag-link" href="/tags/${tag}">${tag} (${tags[tag]})</a></li>
+	 `).join('')}
+	</ul>
 </div>

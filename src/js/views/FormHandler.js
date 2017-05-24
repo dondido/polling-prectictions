@@ -1,3 +1,7 @@
+const postHeader = {
+	'X-Requested-With': 'XMLHttpRequest',
+	'X-XSRF-TOKEN': $cookie('XSRF-TOKEN')
+};
 class FormHandler {
 	constructor($scope) {
 		const onSubmit = form => {
@@ -12,15 +16,16 @@ class FormHandler {
 	}
 	send(e) {
 		const f = e.target,
-			formData = new FormData(f);
+			body = new FormData(f);
 		e.preventDefault();
 		/*Since we add the token as a request header, we delete
 		the csrf value and omit it as a form post parameter */
-		formData.delete('_csrf');
-		return $http({method: 'POST', url: f.action || location.pathname, params: formData});
+		body.delete('_csrf');
+		return fetch(f.action || location.pathname, {method: 'post', body, credentials: 'include', headers: postHeader})
+			.then(res => res.text());
 	}
 	submit(e) {
-		this.send(e).then(res => this.success(res), res => this.error(res));
+		this.send(e).then(res => this.success(res)).catch(res => this.error(res));
 	}
 	success(res) {
 		if(!res) {
