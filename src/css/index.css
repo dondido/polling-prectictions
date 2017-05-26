@@ -607,6 +607,7 @@ button:hover {
     text-align: center;
 }
 .about,
+.privacy,
 .terms {
     white-space: pre-line;
     text-align: justify;
