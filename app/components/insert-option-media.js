@@ -6,4 +6,4 @@ module.exports = (media, created) => {
         return `<iframe class="uploaded-video" src="${media}"></iframe>`;
     }
     return '';
-}
+};

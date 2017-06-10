@@ -29,9 +29,9 @@ const $import = url => {
             script.remove();
         };
         document.documentElement.appendChild(script);
-    }
+    };
     return new Promise(handleImport);
-}
+};
 let prevRoute;
 var classes = classes || {};
 const htmls = {};
@@ -43,6 +43,7 @@ const postHeader = {
     'X-XSRF-TOKEN': $cookie('XSRF-TOKEN')
 };
 const getFilename = path => path.match(/([^/]*?)(?:\..*)?$/)[1] || 'home';
+const toText = res => res.text();
 class Router {
     getFile(files) {
         const names = [];
@@ -66,7 +67,7 @@ class Router {
             names.push(url);
             const urlParams = new URLSearchParams(location.search);
             urlParams.append('ajax', 1);
-            imports.push(fetch(url + '?' + urlParams.toString(), {headers: getHeader}).then(res => res.text()));
+            imports.push(fetch(url + '?' + urlParams.toString(), {headers: getHeader}).then(toText));
         };
         const split = url => url.slice(-3) === '.js' ? scripts.push(url) : contents.push(url);
         files.forEach(split);
@@ -105,7 +106,7 @@ class Router {
                 }
             }
             el = el.parentNode;
-        };
+        }
     }
     getPage(ref) {
         // new RegExp('^account\/os\/.*\/call_back$').test("1account/os/1234567/call_back")
@@ -132,7 +133,7 @@ class Router {
             '/contact': [],
             '/submit': ['js/views/Submit.js'],
             '/poll/.*': ['/js/views/Question.js']
-        }
+        };
         this.routePaths = Object.keys(this.routeMap);
         window.addEventListener('popstate', e => this.handleRouteChange(e));  
         document.addEventListener('click', e => this.handleClick(e));
@@ -159,7 +160,7 @@ class FormHandler {
         the csrf value and omit it as a form post parameter */
         body.delete('_csrf');
         return fetch(f.action || location.pathname, {method: 'post', body, credentials: 'include', headers: postHeader})
-            .then(res => res.text());
+            .then(toText);
     }
     submit(e) {
         this.send(e).then(res => this.success(res)).catch(res => this.error(res));

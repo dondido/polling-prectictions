@@ -1,30 +1,20 @@
-const merge = require('merge'),
-    fs = require('fs'),
-    path1 = require('path'),
+const fs = require('fs'),
     urls = new Map(),
     xhrs = new Map(),
     es6Renderer = require('express-es6-template-engine'),
     perPage = 3,
-    exist = require(__dirname + '/../custom_modules/module-exist'),
     multer = require('multer'),
     createPaginaton = require('./components/create-pagination'),
     insertOptionMedia = require('./components/insert-option-media');
 
 module.exports = function (app, Poll) {
     const folder = app.get('folder');
-    const redirectHash = function(req, res, path) {
-        return req.xhr ? res.json(
-            {
-                path: path
-            }
-        ) : res.redirect(path);
-    };
     const storage = multer.diskStorage({
         destination(req, file, callback) {
             const {body} = req;
             body.created = body.created || Date.now();
             const uploadPath = `uploads/${body.created}`;
-            const setPath = (a, b) => callback(null, uploadPath);
+            const setPath = () => callback(null, uploadPath);
             fs.mkdir(uploadPath, setPath);
         },
         filename(req, file, callback) {
@@ -50,7 +40,7 @@ module.exports = function (app, Poll) {
         return req.xhr ? 
         app.render(req.path.slice(1), {}, res.locals.setContent) :
         app.render('index', {partials: {main: req.path}}, res.locals.setContent);
-    }
+    };
     const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.path}.html`, 'utf8', res.locals.setContent);
     const renderHttpForm = (req, res) => res.render('index', {locals: {token: req.csrfToken()}, partials: {main: req.path}});
     const renderBaseForm = (req, res, next) => req.xhr ? next() : renderHttpForm(req, res);
@@ -72,7 +62,7 @@ module.exports = function (app, Poll) {
         const compareSessions = vote => sessionID === vote.sessionID;
         const checkVotes = option => option.votes.some(compareSessions);
         return options.findIndex(checkVotes);
-    }
+    };
     const renderPoll = (req, res, next) => {
         const {locals} = res;
         const compilePage = doc => {
@@ -87,7 +77,7 @@ module.exports = function (app, Poll) {
             locals.token = req.csrfToken();
             locals.page = 'question-form';
             next();
-        }
+        };
         return Poll.findOne({url: req.params.poll}).exec().then(compilePage);
     };
     const vote = (req, res, next) => {
@@ -107,7 +97,7 @@ module.exports = function (app, Poll) {
         Poll.findOne({url: req.params.poll}).exec().then(registerAnswer);
     };
     const handleSubmit = (req, res) => {
-        const {body, files} = req;
+        const {body} = req;
         const {media} = body;
         const setDesc = (desc, idx) => ({
             desc,
@@ -125,7 +115,6 @@ module.exports = function (app, Poll) {
             console.log("The file was saved!");
         });
         req.xhr ? res.end() : res.redirect('#submitted');
-        //(new Poll(body)).save(saveCb);
     };
     const mapContent = (req, res, next) => {
         const {url} = req;
@@ -140,7 +129,7 @@ module.exports = function (app, Poll) {
         const truncateContent = () => {
             if(contentMap.size > 100) {
                 contentMap.delete(Array.from(contentMap.keys())[0]);
-            };
+            }
         };
         if(urlContent) {
             return setContent(null, urlContent);
@@ -153,15 +142,6 @@ module.exports = function (app, Poll) {
     };
     const listTags = (req, res) => {
         const compile = (err, docs) => {
-            const savePage = (err, content, page) => {
-                fs.writeFile(`${folder}/html/compiled/${page}.html`, content, err => {
-                    if(err) {
-                        return console.log(err);
-                    }
-                    console.log("The file was saved!");
-                });
-            };
-            const saveTags = (err, content) => savePage(err, content, 'tags');
             const tags = {};
             const extractTags = (total, doc) => total.concat(doc.tags);
             const countTags = i => tags[i] = tags[i] + 1 || 1;
@@ -169,7 +149,7 @@ module.exports = function (app, Poll) {
             return req.xhr ? 
                 app.render('tags', {locals: {tags}}, res.locals.setContent) :
                 app.render('index', {locals: {tags}, partials: {main: 'tags'}}, res.locals.setContent);
-        }
+        };
         Poll.find().exec(compile);
     };
     const listPolls = (req, res) => {

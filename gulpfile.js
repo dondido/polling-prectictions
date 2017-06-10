@@ -71,7 +71,7 @@ gulp.task('movejs', () =>
     .pipe(gulp.dest('dist/'))
 );
 gulp.task('lint', () =>
-  gulp.src(['./src/js/**/*', '!./src/js/vendors/**/*'])
+  gulp.src(['./src/js/**/*', './app/**/*', '!./src/js/vendors/**/*'])
     .pipe(jshint('.jshintrc'))
     .pipe(jshint.reporter('jshint-stylish'))
 );

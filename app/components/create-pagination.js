@@ -10,7 +10,7 @@ module.exports = (total, page = 1, order, perPage) => {
     if (start > 1) {
         html += `<li class="pagination-item"><a ${params + 1} rel="prev">1</a>`;
         if(start !== 2) {
-            html += '<li class="pagination-period">'
+            html += '<li class="pagination-period">';
         }
     }
     for ( let i = start; i < page; i ++) {
@@ -22,10 +22,10 @@ module.exports = (total, page = 1, order, perPage) => {
     }
     if (end < last) {
         if(end !== last - 1) {
-            html += '<li class="pagination-period">'
+            html += '<li class="pagination-period">';
         }
         html += `<li class="pagination-item"><a ${params + last} rel="next">${last}</a>`;
     }
     html += `<li class="pagination-next">${page !== last ? `<a ${params + (page + 1)} rel="next"></a>` : ''}</li>`;
     return html;
-}
+};
