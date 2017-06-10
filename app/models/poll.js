@@ -1,8 +1,14 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
+    Vote = new Schema({
+        _id: false,
+        sessionID: String,
+        ip: String,
+        created: {type: Date, default: Date.now},
+    }),
     Option = new Schema({
         _id: false,
-        votes: [String],
+        votes: [Vote],
         desc: { 
             type: String,
             required: true,
@@ -19,6 +25,8 @@ var mongoose = require('mongoose'),
             required: true,
             maxlength: 64,
         },
+        sessionID: String,
+        ip: String,
         desc: { 
             type: String,
             required: true,

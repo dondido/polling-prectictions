@@ -73,13 +73,10 @@ class Router {
         if(prevRoute) {
             contents.push(location.pathname);
             contents.forEach(importContent);
-            scripts.forEach(importScript);
-            if(scripts.length === 0) {
-                importScript('BaseView.js');
-            }
         }
-        else {
-            scripts.forEach(importScript);
+        scripts.forEach(importScript);
+        if(scripts.length === 0) {
+            importScript('BaseView.js');
         }
         return Promise.all(imports).then(createView);
     }
@@ -128,6 +125,7 @@ class Router {
         this.routeMap = {
             '/': [],
             '/tags': [],
+            '/tags/.*': [],
             '/about': [],
             '/terms': [],
             '/privacy': [],

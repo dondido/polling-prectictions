@@ -4,7 +4,7 @@ const merge = require('merge'),
     urls = new Map(),
     xhrs = new Map(),
     es6Renderer = require('express-es6-template-engine'),
-    perPage = 2,
+    perPage = 3,
     exist = require(__dirname + '/../custom_modules/module-exist'),
     multer = require('multer'),
     createPaginaton = require('./components/create-pagination'),
@@ -44,10 +44,9 @@ module.exports = function (app, Poll) {
         }
     });
     app.engine('html', es6Renderer);
-    app.set('views', folder + '/html');
+    app.set('views', [folder + '/html1', folder + '/html']);
     app.set('view engine', 'html');
     const renderBase = (req, res) => {
-        console.log(222, 1)
         return req.xhr ? 
         app.render(req.path.slice(1), {}, res.locals.setContent) :
         app.render('index', {partials: {main: req.path}}, res.locals.setContent);
@@ -69,11 +68,16 @@ module.exports = function (app, Poll) {
         locals.insertOptionMedia = insertOptionMedia;
         app.render(locals.page, {locals}, renderPage);
     };
+    const findVote = (options, sessionID) => {
+        const compareSessions = vote => sessionID === vote.sessionID;
+        const checkVotes = option => option.votes.some(compareSessions);
+        return options.findIndex(checkVotes);
+    }
     const renderPoll = (req, res, next) => {
         const {locals} = res;
         const compilePage = doc => {
-            const checkVotes = option => option.votes.includes(req.sessionID);
-            const voteIndex = doc.options.findIndex(checkVotes);
+            const {sessionID} = req;
+            const voteIndex = findVote(doc.options, sessionID);
             locals.doc = doc;
             if(voteIndex !== -1) {
                 locals.page = 'question-results';
@@ -89,10 +93,10 @@ module.exports = function (app, Poll) {
     const vote = (req, res, next) => {
         const {locals} = res;
         const registerAnswer = doc => {
-            const checkVotes = option => option.votes.includes(req.sessionID);
-            const voteIndex = doc.options.findIndex(checkVotes);
+            const {sessionID} = req;
+            const voteIndex = findVote(doc.options, sessionID);
             if(voteIndex === -1) {
-                doc.options[req.body.answer].votes.push(req.sessionID);
+                doc.options[req.body.answer].votes.push({sessionID, ip: req.ip});
                 doc.save();
             }
             locals.voteIndex = + req.body.answer;
@@ -114,14 +118,12 @@ module.exports = function (app, Poll) {
         body.options = body.options.map(setDesc);
         body.created = body.created || Date.now();
         body.tags = body.tags.split(',').slice(0, 5);
-        console.log(122, JSON.stringify(body))
         fs.writeFile(`uploads/${body.created}/poll.json`, JSON.stringify(body), err => {
             if(err) {
                 return console.log(err);
             }
             console.log("The file was saved!");
         });
-        console.log(111, req.xhr, res.end)
         req.xhr ? res.end() : res.redirect('#submitted');
         //(new Poll(body)).save(saveCb);
     };
@@ -130,7 +132,6 @@ module.exports = function (app, Poll) {
         const contentMap = req.xhr ? xhrs : urls;
         const urlContent = contentMap.get(url);
         const setContent = (err, content) => {
-            console.log(111, err, content)
             // put the latest url last
             contentMap.delete(url);
             contentMap.set(url, content);
@@ -176,6 +177,7 @@ module.exports = function (app, Poll) {
         const page = req.query.page || 1;
         const tags = req.params.tag;
         const query = tags ? {tags} : {};
+        
         if('most-recent' === order) {
             const countDocs = n => {
                 const renderPage = docs => {

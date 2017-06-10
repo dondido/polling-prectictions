@@ -17,13 +17,17 @@ const mongoose = require('mongoose'),
 gulp.task('insert', () => {
   mongoose.connect(uristring, err => {
     const folder = process.argv[process.argv.indexOf('--folder') + 1];
+    const urlIndex = process.argv.indexOf('--url');
+    const url = urlIndex === -1 ? folder : process.argv[urlIndex + 1];
     const insertJson = (err, data) => {
       if (err) throw err;
       const deleteFile = (err, data) => {
         if (err) throw err;
         console.log('File inserted in MongoDB: ', data);
       };
-      (new Poll(JSON.parse(data))).save(deleteFile);
+      const doc = JSON.parse(data);
+      doc.url = url;
+      (new Poll(doc)).save(deleteFile);
       gulp.src('uploads/' + folder + '/*.{gif,jpg,jpeg,svg,png}')
         .pipe(imagemin(
           [imagemin.svgo({plugins: [{removeViewBox: true}]})],
