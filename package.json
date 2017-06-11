@@ -20,7 +20,7 @@
     "cookie-parser": "^1.4.0",
     "csurf": "^1.8.3",
     "express": "^4.13.3",
-    "express-es6-template-engine": "^1.2.2",
+    "express-es6-template-engine": "^2.0.0",
     "express-session": "^1.12.1",
     "merge": "^1.2.0",
     "mongodb": "^2.0.48",

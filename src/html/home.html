@@ -1,5 +1,5 @@
 <div id="home" class="home">
-${docs.map(d => `
+${$.docs.map(d => `
 	<article itemscope itemtype="http://schema.org/Question" class="question-tile">
 		<a class="question-tile-content" href="/poll/${d.url}">
 			<figure class="question-figure">
@@ -12,7 +12,7 @@ ${docs.map(d => `
   `).join('')}
   	<nav class="navigation-pagination">
 	  	<ul role="navigation" class="pagination-list" itemscope itemtype="http://schema.org/SiteNavigationElement/Pagination">
-	  		${pagination}
+	  		${$.pagination}
 	  	</ul>
   	<nav>
 </div>

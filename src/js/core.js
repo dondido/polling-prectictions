@@ -33,15 +33,9 @@ const $import = url => {
     return new Promise(handleImport);
 };
 let prevRoute;
-var classes = classes || {};
+const classes = {};
 const htmls = {};
-const getHeader = {
-  'X-Requested-With': 'XMLHttpRequest'
-};
-const postHeader = {
-    'X-Requested-With': 'XMLHttpRequest',
-    'X-XSRF-TOKEN': $cookie('XSRF-TOKEN')
-};
+
 const getFilename = path => path.match(/([^/]*?)(?:\..*)?$/)[1] || 'home';
 const toText = res => res.text();
 class Router {
@@ -67,7 +61,17 @@ class Router {
             names.push(url);
             const urlParams = new URLSearchParams(location.search);
             urlParams.append('ajax', 1);
-            imports.push(fetch(url + '?' + urlParams.toString(), {headers: getHeader}).then(toText));
+            imports.push(
+                fetch(
+                    url + '?' + urlParams.toString(),
+                    {
+                        credentials: 'include',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        }
+                    }
+                ).then(toText)
+            );
         };
         const split = url => url.slice(-3) === '.js' ? scripts.push(url) : contents.push(url);
         files.forEach(split);
@@ -153,14 +157,24 @@ class FormHandler {
         [].slice.call($scope.querySelectorAll('.form')).forEach(onSubmit);
     }
     send(e) {
-        const f = e.target,
-            body = new FormData(f);
+        const f = e.target;
+        const body = new FormData(f);
         e.preventDefault();
         /*Since we add the token as a request header, we delete
         the csrf value and omit it as a form post parameter */
         body.delete('_csrf');
-        return fetch(f.action || location.pathname, {method: 'post', body, credentials: 'include', headers: postHeader})
-            .then(toText);
+        return fetch(
+            f.action || location.pathname,
+            {
+                method: 'post',
+                credentials: 'include',
+                body,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-XSRF-TOKEN': $cookie('XSRF-TOKEN'),
+                }
+            }
+        ).then(toText);
     }
     submit(e) {
         this.send(e).then(res => this.success(res)).catch(res => this.error(res));

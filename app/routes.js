@@ -1,14 +1,16 @@
-const fs = require('fs'),
-    urls = new Map(),
-    xhrs = new Map(),
-    es6Renderer = require('express-es6-template-engine'),
-    perPage = 3,
-    multer = require('multer'),
-    createPaginaton = require('./components/create-pagination'),
-    insertOptionMedia = require('./components/insert-option-media');
+const fs = require('fs');
+const urls = new Map();
+const xhrs = new Map();
+const templates = {};
+const es6Renderer = require('express-es6-template-engine');
+const perPage = 3;
+const multer = require('multer');
+const createPaginaton = require('./components/create-pagination');
+const insertOptionMedia = require('./components/insert-option-media');
 
 module.exports = function (app, Poll) {
     const folder = app.get('folder');
+    const views = folder + '/html';
     const storage = multer.diskStorage({
         destination(req, file, callback) {
             const {body} = req;
@@ -33,30 +35,32 @@ module.exports = function (app, Poll) {
             cb(null, false, new Error());
         }
     });
+    const getContent = (err, filenames) => {
+        const readFile = filename => {
+            const setTemplate = (err, content) => templates[filename.replace('.html', '')] = es6Renderer(content);
+            fs.readFile(views + '/' + filename, setTemplate);
+        };
+        filenames.forEach(readFile);
+    };
+    fs.readdir(views, getContent);
     app.engine('html', es6Renderer);
-    app.set('views', [folder + '/html1', folder + '/html']);
+    app.set('views', views);
     app.set('view engine', 'html');
     const renderBase = (req, res) => {
-        return req.xhr ? 
-        app.render(req.path.slice(1), {}, res.locals.setContent) :
-        app.render('index', {partials: {main: req.path}}, res.locals.setContent);
+        const main = templates[req.path.slice(1)]();
+        res.locals.send(req.xhr ? main : templates.index({main}));
     };
-    const renderAjaxForm = (req, res) => fs.readFile(`${folder}/html/${req.path}.html`, 'utf8', res.locals.setContent);
-    const renderHttpForm = (req, res) => res.render('index', {locals: {token: req.csrfToken()}, partials: {main: req.path}});
+    const setToken = req => templates[req.path.slice(1)]({token: req.csrfToken()});
+    const renderAjaxForm = (req, res) => res.locals.send(setToken(req));
+    const renderHttpForm = (req, res) => res.send(templates.index({main: setToken(req)}));
     const renderBaseForm = (req, res, next) => req.xhr ? next() : renderHttpForm(req, res);
     const renderVote = (req, res) => {
         const {locals} = res;
-        const renderPage = (err, content) => {
-            const sendPage = (err, page) => res.send(page);
-            locals.questionContent = content;
-            if(req.xhr) {
-                return app.render('question', {locals}, sendPage);
-            }
-            res.render('index', {locals, partials: {main: 'question'}});
-        };
         locals.allVotes = locals.doc.options.reduce((t, o) => t + o.votes.length, 0);
         locals.insertOptionMedia = insertOptionMedia;
-        app.render(locals.page, {locals}, renderPage);
+        locals.questionContent = templates[locals.page](locals);
+        const main = templates.question(locals);
+        res.send(req.xhr ? main : templates.index({main}));
     };
     const findVote = (options, sessionID) => {
         const compareSessions = vote => sessionID === vote.sessionID;
@@ -120,7 +124,7 @@ module.exports = function (app, Poll) {
         const {url} = req;
         const contentMap = req.xhr ? xhrs : urls;
         const urlContent = contentMap.get(url);
-        const setContent = (err, content) => {
+        const send = content => {
             // put the latest url last
             contentMap.delete(url);
             contentMap.set(url, content);
@@ -132,10 +136,10 @@ module.exports = function (app, Poll) {
             }
         };
         if(urlContent) {
-            return setContent(null, urlContent);
+            return send(urlContent);
         }
-        res.locals.setContent = (err, content) => {
-            setContent(null, content);
+        res.locals.send = content => {
+            send(content);
             truncateContent();
         };
         next();
@@ -146,9 +150,8 @@ module.exports = function (app, Poll) {
             const extractTags = (total, doc) => total.concat(doc.tags);
             const countTags = i => tags[i] = tags[i] + 1 || 1;
             docs.reduce(extractTags, []).forEach(countTags);
-            return req.xhr ? 
-                app.render('tags', {locals: {tags}}, res.locals.setContent) :
-                app.render('index', {locals: {tags}, partials: {main: 'tags'}}, res.locals.setContent);
+            const main = templates.tags({tags});
+            res.locals.send(req.xhr ? main : templates.index({main}));
         };
         Poll.find().exec(compile);
     };
@@ -161,10 +164,8 @@ module.exports = function (app, Poll) {
         if('most-recent' === order) {
             const countDocs = n => {
                 const renderPage = docs => {
-                    const locals = {docs, pagination: createPaginaton(n, + page, order, perPage)};
-                    return req.xhr ? 
-                        app.render('home', {locals}, res.locals.setContent) :
-                        app.render('index', {locals, partials: {main: 'home'}}, res.locals.setContent);
+                    const main = templates.home({docs, pagination: createPaginaton(n, + page, order, perPage)});
+                    res.locals.send(req.xhr ? main : templates.index({main}));
                 };
                 Poll.find(query).skip(perPage * (page - 1)).limit(perPage).exec().then(renderPage);
             };
